@@ -1,0 +1,15 @@
+{
+    "1": {
+        "titulo": "Descargar contenido",
+        "mensaje": "Selecciona la opción 1 en el menú principal. Luego, sigue las instrucciones para elegir el tipo de archivo que deseas descargar."
+    },
+    "2": {
+        "titulo": "Convertir archivos",
+        "mensaje": "Selecciona la opción 2 en el menú principal. Luego, escoge el formato al que deseas convertir tu archivo."
+    },
+    "3": {
+        "titulo": "Mejorar calidad",
+        "mensaje": "Selecciona la opción 3 en el menú principal y sigue los pasos para mejorar la calidad de tus archivos multimedia."
+    }
+}
+
