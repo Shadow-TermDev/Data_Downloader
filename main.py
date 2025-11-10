@@ -44,8 +44,8 @@ def mostrar_menu():
         (Fore.BLUE, "2 - Convertir archivos"),
         (Fore.CYAN, "3 - Mejorar calidad de archivos"),
         (Fore.YELLOW, "4 - Ayuda"),
-        (Fore.MAGENTA, "5 - Configurar transiciones"),
-        (Fore.RED, "6 - Salir"),
+        ## (Fore.MAGENTA, "5 - Configurar transiciones"),
+        (Fore.RED, "5 - Salir"),
     ]
 
     # Dibujar cuadro del menú
@@ -74,13 +74,13 @@ def main():
             "2": menu_convertidor,
             "3": menu_mejorador,
             "4": menu_ayuda,
-            "5": menu_transiciones,
-            "6": lambda: print(Fore.RED + "\nSaliendo del programa... ¡Hasta luego!")
+            ##"5": menu_transiciones,
+            "5": lambda: print(Fore.RED + "\nSaliendo del programa... ¡Hasta luego!")
         }
 
         # Ejecutar la opción seleccionada o mostrar error
         if opcion in opciones_menu:
-            if opcion == "6":
+            if opcion == "5":
                 mostrar_cursor()
                 break  # Salir del bucle si elige opción 6
             opciones_menu[opcion]()  # Ejecutar la función correspondiente
