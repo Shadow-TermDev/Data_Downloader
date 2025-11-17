@@ -1,86 +1,104 @@
 import os
 import subprocess
 from colorama import Fore, Style
-from src.utils import buscar_archivo, pausar
-from src.plugins.animaciones import ocultar_cursor, mostrar_cursor  # Importamos las funciones
+from src.utils import pausar
+from src.plugins.animaciones import ocultar_cursor, mostrar_cursor
 
 def seleccionar_calidad():
-    """Solicita al usuario la calidad de mejora y retorna el bitrate correspondiente."""
+    print(Fore.CYAN + "\nSelecciona la calidad deseada:")
     opciones = {
-        "1": "128k",  # Calidad estándar
-        "2": "256k",  # Alta calidad
-        "3": "320k"   # Calidad máxima
+        "1": ("128k", "128 kbps - Calidad estándar"),
+        "2": ("256k", "256 kbps - Alta calidad"),
+        "3": ("320k", "320 kbps - Calidad máxima (mejor)")
     }
-    
-    print(Fore.CYAN + "\n🔧 Selecciona la calidad:")
-    print(Fore.GREEN + " 1 - Calidad estándar (128 kbps)")
-    print(Fore.YELLOW + " 2 - Alta calidad (256 kbps)")
-    print(Fore.MAGENTA + " 3 - Calidad máxima (320 kbps)")
+    for k, (_, desc) in opciones.items():
+        color = Fore.GREEN if k == "1" else Fore.YELLOW if k == "2" else Fore.MAGENTA
+        print(color + f"  {k} - {desc}")
 
-    # Mostrar cursor antes de solicitar entrada
     mostrar_cursor()
-    seleccion = input(Fore.CYAN + "  -> Ingresa el número de la calidad: " + Style.RESET_ALL).strip()
+    choice = input(Fore.CYAN + "\n  -> Elige una opción [1-3]: " + Style.RESET_ALL).strip()
     ocultar_cursor()
 
-    return opciones.get(seleccion, "256k")  # Por defecto, calidad alta
+    return opciones.get(choice, opciones["2"])[0]  # Por defecto 256k
 
-def generar_nombre_salida(nombre_original):
-    """Genera un nuevo nombre para el audio mejorado sin afectar la extensión."""
-    base, extension = os.path.splitext(nombre_original)
-    return f"{base}_mejorado{extension}"
 
-def mejorar_audio(ruta_audio, nuevo_bitrate):
-    """Ejecuta el comando FFmpeg para mejorar la calidad del audio."""
-    nueva_ruta = generar_nombre_salida(ruta_audio)
-    print(Fore.YELLOW + f"\n⏳ Mejorando calidad a {nuevo_bitrate}...")
+def generar_nombre_salida(ruta_original):
+    base, ext = os.path.splitext(ruta_original)
+    return f"{base}_mejorado{ext}"
 
-    comando_ffmpeg = [
-        "ffmpeg", "-i", ruta_audio,
-        "-b:a", nuevo_bitrate,
-        nueva_ruta
+
+def ejecutar_ffmpeg(entrada, salida, bitrate):
+    """
+    Mejora el audio con FFmpeg manteniendo:
+    - Portada (cover art)
+    - Metadatos
+    - Calidad máxima posible
+    """
+    comando = [
+        "ffmpeg",
+        "-i", entrada,
+        "-c:a", "libmp3lame",
+        "-b:a", bitrate,
+        "-map_metadata", "0",      # Copia todos los metadatos
+        "-map", "0",               # Copia todas las pistas (incluye portada)
+        "-y",                      # Sobrescribe sin preguntar
+        salida
     ]
 
-    resultado = subprocess.run(comando_ffmpeg, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if resultado.returncode == 0:
-        return nueva_ruta
-    else:
-        print(Fore.RED + "\n❌ Error al mejorar el audio:" + Style.RESET_ALL)
-        print(resultado.stderr)
-        return None
+    print(Fore.YELLOW + f"\nMejorando audio a {bitrate} (manteniendo portada)...")
+    print(Fore.CYAN + "Esto puede tomar algunos segundos...\n")
 
-def preguntar_eliminar_original(ruta_audio):
-    """Pregunta al usuario si desea eliminar el audio original."""
-    
-    # Mostrar cursor antes de solicitar entrada
+    result = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    if result.returncode == 0:
+        print(Fore.GREEN + f"\nAudio mejorado con éxito!")
+        print(Fore.WHITE + f"Guardado como: {os.path.basename(salida)}")
+        return True
+    else:
+        print(Fore.RED + "\nError al procesar el audio con ffmpeg.")
+        if "No such file or directory" in result.stderr:
+            print(Fore.RED + "ffmpeg no está instalado.")
+        else:
+            print(Fore.RED + result.stderr.split("\n")[-3:])
+        return False
+
+
+def preguntar_eliminar_original(ruta):
+    print(Fore.YELLOW + "\n¿Deseas eliminar el audio original?")
+    print(Fore.GREEN + "  1 - Sí, eliminar")
+    print(Fore.RED + "  2 - No, conservar")
+
     mostrar_cursor()
-    eleccion = input(Fore.YELLOW + "\n🗑️   ¿Eliminar archivo original? (s/n): " + Style.RESET_ALL).strip().lower()
+    choice = input(Fore.CYAN + "\n  -> Tu elección [1-2]: " + Style.RESET_ALL).strip()
     ocultar_cursor()
 
-    if eleccion == "s":
-        os.remove(ruta_audio)
-        print(Fore.GREEN + f"✅ Archivo original eliminado: {ruta_audio}" + Style.RESET_ALL)
+    if choice == "1":
+        try:
+            os.remove(ruta)
+            print(Fore.GREEN + "Archivo original eliminado.")
+        except Exception as e:
+            print(Fore.RED + f"No se pudo eliminar: {e}")
 
-def mejorar_calidad_audio(nombre_audio):
-    """Proceso principal para mejorar la calidad de un archivo de audio."""
-    ocultar_cursor()  # Ocultar cursor al iniciar la función
+
+def mejorar_calidad_audio(ruta_audio):
+    """
+    Recibe directamente la ruta completa (gracias a buscar_archivo)
+    """
+    ocultar_cursor()
 
     try:
-        ruta_audio = buscar_archivo(nombre_audio)
-        if not ruta_audio:
-            print(Fore.RED + f"\n❌ No se encontró el archivo '{nombre_audio}'." + Style.RESET_ALL)
+        if not os.path.exists(ruta_audio):
+            print(Fore.RED + f"\nNo se encontró el archivo:\n{ruta_audio}")
             pausar()
             return
 
-        nuevo_bitrate = seleccionar_calidad()
-        nueva_ruta = mejorar_audio(ruta_audio, nuevo_bitrate)
+        bitrate = seleccionar_calidad()
+        salida = generar_nombre_salida(ruta_audio)
 
-        if nueva_ruta:
-            print(Fore.GREEN + f"\n✅ Audio mejorado guardado en: {nueva_ruta}" + Style.RESET_ALL)
+        if ejecutar_ffmpeg(ruta_audio, salida, bitrate):
             preguntar_eliminar_original(ruta_audio)
 
-        pausar()
-
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {e}" + Style.RESET_ALL)
-        pausar()
-
+        print(Fore.RED + f"\nError inesperado: {e}")
+    finally:
+        pausar()  # ← Siempre espera Enter al final

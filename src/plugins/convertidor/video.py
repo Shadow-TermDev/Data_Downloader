@@ -1,34 +1,44 @@
 import os
-import shlex
 import subprocess
 from colorama import Fore, Style
+from src.utils import pausar
 from src.plugins.animaciones import ocultar_cursor, mostrar_cursor
 
 def convertir_video(ruta_video, formato):
-    """Convierte un video a otro formato usando ffmpeg."""
-    ocultar_cursor()  # Ocultar cursor al iniciar
+    ocultar_cursor()
 
     if not os.path.exists(ruta_video):
-        print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}" + Style.RESET_ALL)
-        mostrar_cursor()  # Mostrar cursor antes de salir
+        print(Fore.RED + f"\nArchivo no encontrado:\n{ruta_video}")
+        pausar()
         return
 
-    ruta_salida = f"{os.path.splitext(ruta_video)[0]}.{formato}"
-    comando = ["ffmpeg", "-i", ruta_video, ruta_salida, "-y"]
+    nombre_base = os.path.splitext(ruta_video)[0]
+    ruta_salida = f"{nombre_base}.{formato}"
 
-    print(Fore.YELLOW + f"\n🎬 Convirtiendo video a {formato}..." + Style.RESET_ALL)
+    print(Fore.YELLOW + f"\nConvirtiendo video a .{formato.upper()}...")
+    print(Fore.CYAN + "Esto puede tomar varios minutos...\n")
+
+    comando = [
+        "ffmpeg", "-i", ruta_video,
+        "-c:v", "libx264" if formato in ["mp4", "mov"] else "copy",
+        "-c:a", "aac" if formato in ["mp4", "mov"] else "copy",
+        "-y", ruta_salida
+    ]
 
     try:
-        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(comando, stderr=subprocess.PIPE, text=True, bufsize=1)
+        for linea in process.stderr:
+            if "frame=" in linea or "size=" in linea:
+                print(f"\r{Fore.CYAN}{linea.strip()}", end="")
+        process.wait()
 
-        if resultado.returncode == 0:
-            print(Fore.GREEN + f"\n✅ Video convertido y guardado en: {ruta_salida}" + Style.RESET_ALL)
+        if process.returncode == 0:
+            print(Fore.GREEN + f"\nVideo convertido exitosamente!")
+            print(Fore.WHITE + f"Guardado como: {os.path.basename(ruta_salida)}")
         else:
-            print(Fore.RED + "\n❌ Error en la conversión del video." + Style.RESET_ALL)
-            print(resultado.stderr)
+            print(Fore.RED + "\nError durante la conversión.")
 
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {e}" + Style.RESET_ALL)
-
-    mostrar_cursor()  # Mostrar cursor al finalizar
-
+        print(Fore.RED + f"\nError: {e}")
+    finally:
+        pausar()

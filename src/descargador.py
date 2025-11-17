@@ -1,91 +1,101 @@
 import os
 import shutil
-import pyfiglet
+from pyfiglet import Figlet
 from colorama import Fore, Style, init
-from src.plugins.gestor_descargas import descargar_video, descargar_audio, descargar_imagen
-from src.plugins.animaciones import ocultar_cursor, mostrar_cursor  # Importamos las funciones
 
-# Inicializar colorama para colores en la terminal
+# Importamos directamente los gestores reales
+from src.plugins.gestor_descarga_video import descargar_video
+from src.plugins.gestor_descarga_audio import descargar_audio
+from src.plugins.gestor_descarga_imagen import descargar_imagen
+
+from src.plugins.animaciones import ocultar_cursor, mostrar_cursor
+from src.utils import pausar
+
 init(autoreset=True)
 
-# Función para limpiar la pantalla en diferentes sistemas operativos
 def limpiar_pantalla():
     os.system("cls" if os.name == "nt" else "clear")
 
-# Función para centrar texto en la terminal con manejo de error en entornos sin terminal
 def centrar_texto(texto):
     try:
-        ancho_terminal = shutil.get_terminal_size().columns
+        ancho = shutil.get_terminal_size().columns
     except:
-        ancho_terminal = 80  # Ancho por defecto si no hay terminal
-    return texto.center(ancho_terminal)
+        ancho = 80
+    return texto.center(ancho)
 
-# Función para mostrar el menú de descargas
 def mostrar_menu_descargador():
     limpiar_pantalla()
 
-    # Título "Downloader"
-    titulo = pyfiglet.figlet_format("Downloader", font="slant")
-    for linea in titulo.split("\n"):
+    # Título moderno (pyfiglet actual)
+    figlet = Figlet(font="slant")
+    titulo = figlet.renderText("Downloader")
+    for linea in titulo.splitlines():
         print(Fore.YELLOW + centrar_texto(linea))
-    print(Fore.CYAN + centrar_texto("📥 DESCARGA ARCHIVOS MULTIMEDIA 📥\n"))
+    print(Fore.CYAN + centrar_texto("DESCARGA ARCHIVOS MULTIMEDIA\n"))
 
-    # Opciones del menú
+    # Cuadro perfecto de 52 caracteres (igual que el de mejorador)
+    ancho = 52
+    print(Fore.MAGENTA + "╭" + "─" * (ancho - 2) + "╮")
+    
     opciones = [
-        (Fore.GREEN, "1 - Descargar video 🎬"),
-        (Fore.GREEN, "2 - Descargar audio 🎵"),
-        (Fore.GREEN, "3 - Descargar imagen 🖼️ "),
-        (Fore.RED, "4 - Volver al menú principal"),
+        "1 - Descargar video ",
+        "2 - Descargar audio ",
+        "3 - Descargar imagen ",
+        "4 - Volver al menú principal "
     ]
 
-    # Dibujar cuadro del menú
-    print(Fore.MAGENTA + "╭" + "─" * 48)
-    for color, texto in opciones:
-        print(Fore.MAGENTA + "│" + color + " " + texto)
-    print(Fore.MAGENTA + "╰" + "─" * 48)
+    for i, texto in enumerate(opciones):
+        color = Fore.GREEN if i < 3 else Fore.RED
+        print(Fore.MAGENTA + "│ " + color + texto.ljust(ancho - 4) + Fore.MAGENTA + " │")
+    
+    print(Fore.MAGENTA + "╰" + "─" * (ancho - 2) + "╯\n")
 
-    # Mostrar cursor antes de solicitar entrada
     mostrar_cursor()
     print(Fore.CYAN + "  -> Ingresa el número de la opción: ", end="")
 
-# Función principal del menú de descargas
 def menu_descargador():
-    ocultar_cursor()  # Ocultar cursor al entrar al menú
-
-    opciones_descarga = {
-        "1": ("📂 Ingresa la URL del video: ", descargar_video),
-        "2": ("📂 Ingresa la URL del audio: ", descargar_audio),
-        "3": ("📂 Ingresa la URL de la imagen: ", descargar_imagen),
-        "4": None,  # Opción para volver al menú principal
-    }
+    ocultar_cursor()
 
     while True:
         mostrar_menu_descargador()
-
-        # Mostrar cursor antes de solicitar entrada
-        mostrar_cursor()
-        opcion = input(Style.RESET_ALL).strip()
+        opcion = input().strip()
         ocultar_cursor()
 
-        if opcion in opciones_descarga:
-            if opcion == "4":
-                return  # Volver al menú principal
+        if opcion == "4":
+            return
 
-            mensaje, funcion_descarga = opciones_descarga[opcion]
+        if opcion not in ["1", "2", "3"]:
+            print(Fore.RED + centrar_texto("Opción no válida. Inténtalo de nuevo.") + Style.RESET_ALL)
+            input(Fore.YELLOW + centrar_texto("Presiona Enter para continuar..."))
+            continue
 
-            # Mostrar cursor antes de solicitar la URL
-            mostrar_cursor()
-            url = input(mensaje).strip()
-            ocultar_cursor()
+        mensajes = {
+            "1": "Ingresa la URL del video: ",
+            "2": "Ingresa la URL del audio: ",
+            "3": "Ingresa la URL de la imagen: "
+        }
 
-            try:
-                funcion_descarga(url)
-            except Exception as e:
-                print(Fore.RED + f"\n⚠️ Error en la descarga: {e}" + Style.RESET_ALL)
-        else:
-            print(Fore.RED + "\n⚠️ Opción no válida. Inténtalo de nuevo." + Style.RESET_ALL)
+        funciones = {
+            "1": descargar_video,
+            "2": descargar_audio,
+            "3": descargar_imagen
+        }
 
-# Ejecutar solo si el script se ejecuta directamente
+        mostrar_cursor()
+        print()
+        url = input(Fore.YELLOW + f"{mensajes[opcion]}").strip()
+        ocultar_cursor()
+
+        if not url:
+            print(Fore.RED + centrar_texto("URL vacía.") + Style.RESET_ALL)
+            input(Fore.YELLOW + centrar_texto("Presiona Enter para continuar..."))
+            continue
+
+        try:
+            funciones[opcion](url)
+        except Exception as e:
+            print(Fore.RED + centrar_texto(f"Error en la descarga: {e}") + Style.RESET_ALL)
+            input(Fore.YELLOW + centrar_texto("Presiona Enter para continuar..."))
+
 if __name__ == "__main__":
     menu_descargador()
-

@@ -1,78 +1,112 @@
 import os
-from colorama import Fore, Style
 from PIL import Image, ImageEnhance, ImageFilter
-from src.utils import buscar_archivo, pausar
-from src.plugins.animaciones import ocultar_cursor, mostrar_cursor  # Importamos las funciones
+from colorama import Fore, Style
+from src.utils import pausar
+from src.plugins.animaciones import ocultar_cursor, mostrar_cursor
 
 def seleccionar_calidad():
-    """Solicita al usuario la calidad de mejora y retorna los factores correspondientes."""
+    print(Fore.CYAN + "\nSelecciona la calidad de mejora:")
     opciones = {
-        "1": (1.2, 1.1, 1.2),  # Baja calidad
-        "2": (1.5, 1.3, 1.5),  # Calidad media
-        "3": (2.0, 1.6, 2.0)   # Alta calidad
+        "1": ((1.2, 1.1, 1.2), "1.2x - Rápido"),
+        "2": ((1.5, 1.3, 1.5), "1.5x - Balanceado (recomendado)"),
+        "3": ((2.0, 1.6, 2.0), "2.0x - Máxima calidad")
     }
     
-    print(Fore.CYAN + "\n🔧 Selecciona la calidad:")
-    print(Fore.GREEN + " 1 - Baja calidad (rápido)")
-    print(Fore.YELLOW + " 2 - Calidad media (balanceado)")
-    print(Fore.MAGENTA + " 3 - Alta calidad (procesamiento intenso)")
+    for k, (_, desc) in opciones.items():
+        color = Fore.GREEN if k == "1" else Fore.YELLOW if k == "2" else Fore.MAGENTA
+        print(color + f"  {k} - {desc}")
 
-    # Mostrar cursor antes de solicitar entrada
     mostrar_cursor()
-    seleccion = input(Fore.CYAN + "  -> Ingresa el número de la calidad: " + Style.RESET_ALL).strip()
+    choice = input(Fore.CYAN + "\n  -> Elige una opción [1-3]: " + Style.RESET_ALL).strip()
     ocultar_cursor()
 
-    return opciones.get(seleccion, opciones["2"])  # Por defecto, calidad media
+    return opciones.get(choice, opciones["2"])[0]  # Por defecto: balanceado
 
-def generar_nombre_salida(nombre_original):
-    """Genera un nuevo nombre para la imagen mejorada sin afectar la extensión."""
-    base, extension = os.path.splitext(nombre_original)
-    return f"{base}_mejorada{extension}"
 
-def mejorar_imagen(ruta_imagen, factor_nitidez, factor_contraste, escala):
-    """Aplica mejoras a la imagen según los factores seleccionados."""
-    with Image.open(ruta_imagen) as imagen:
-        nueva_resolucion = (int(imagen.width * escala), int(imagen.height * escala))
-        imagen = imagen.resize(nueva_resolucion, Image.LANCZOS)
-        imagen = imagen.filter(ImageFilter.DETAIL).filter(ImageFilter.SHARPEN)
-        imagen = ImageEnhance.Sharpness(imagen).enhance(factor_nitidez)
-        imagen = ImageEnhance.Contrast(imagen).enhance(factor_contraste)
-        return imagen
+def generar_nombre_salida(ruta_original):
+    base, ext = os.path.splitext(ruta_original)
+    return f"{base}_mejorada{ext}"
 
-def preguntar_eliminar_original(ruta_imagen):
-    """Pregunta al usuario si desea eliminar la imagen original."""
-    
-    # Mostrar cursor antes de solicitar entrada
+
+def mejorar_imagen(ruta_entrada, escala, contraste, nitidez):
+    try:
+        with Image.open(ruta_entrada) as img:
+            # Redimensionar con LANCZOS (mejor calidad)
+            nuevo_ancho = int(img.width * escala)
+            nuevo_alto = int(img.height * escala)
+            img = img.resize((nuevo_ancho, nuevo_alto), Image.LANCZOS)
+
+            # Mejorar detalles y nitidez
+            img = img.filter(ImageFilter.DETAIL)
+            img = img.filter(ImageFilter.SHARPEN)
+            img = ImageEnhance.Sharpness(img).enhance(nitidez)
+            img = ImageEnhance.Contrast(img).enhance(contraste)
+
+            # Mantener metadatos EXIF si existen
+            exif = img.info.get("exif")
+            return img, exif
+    except Exception as e:
+        print(Fore.RED + f"Error al procesar la imagen: {e}")
+        return None, None
+
+
+def preguntar_eliminar_original(ruta):
+    print(Fore.YELLOW + "\n¿Deseas eliminar la imagen original?")
+    print(Fore.GREEN + "  1 - Sí, eliminar")
+    print(Fore.RED + "  2 - No, conservar")
+
     mostrar_cursor()
-    eleccion = input(Fore.YELLOW + "\n🗑️   ¿Eliminar archivo original? (s/n): " + Style.RESET_ALL).strip().lower()
+    choice = input(Fore.CYAN + "\n  -> Tu elección [1-2]: " + Style.RESET_ALL).strip()
     ocultar_cursor()
 
-    if eleccion == "s":
-        os.remove(ruta_imagen)
-        print(Fore.GREEN + f"✅ Archivo original eliminado: {ruta_imagen}" + Style.RESET_ALL)
+    if choice == "1":
+        try:
+            os.remove(ruta)
+            print(Fore.GREEN + "Imagen original eliminada.")
+        except:
+            print(Fore.RED + "No se pudo eliminar el archivo original.")
 
-def mejorar_calidad_imagen(nombre_imagen):
-    """Proceso principal para mejorar la calidad de una imagen."""
-    ocultar_cursor()  # Ocultar cursor al iniciar la función
+
+def mejorar_calidad_imagen(ruta_imagen):
+    """
+    Recibe la ruta completa del archivo (gracias a buscar_archivo)
+    """
+    ocultar_cursor()
 
     try:
-        ruta_imagen = buscar_archivo(nombre_imagen)
-        if not ruta_imagen:
-            print(Fore.RED + f"\n❌ No se encontró el archivo '{nombre_imagen}'." + Style.RESET_ALL)
+        if not os.path.exists(ruta_imagen):
+            print(Fore.RED + f"\nNo se encontró la imagen:\n{ruta_imagen}")
             pausar()
             return
 
-        factores = seleccionar_calidad()
-        imagen_mejorada = mejorar_imagen(ruta_imagen, *factores)
-        nueva_ruta = generar_nombre_salida(ruta_imagen)
-        imagen_mejorada.save(nueva_ruta)
+        print(Fore.CYAN + f"\nProcesando: {os.path.basename(ruta_imagen)}")
+        
+        escala, contraste, nitidez = seleccionar_calidad()
+        salida = generar_nombre_salida(ruta_imagen)
 
-        print(Fore.GREEN + f"\n✅ Imagen mejorada guardada en: {nueva_ruta}" + Style.RESET_ALL)
+        print(Fore.YELLOW + f"\nMejorando imagen ×{escala} (nitidez + contraste)...")
+        print(Fore.CYAN + "Esto puede tomar unos segundos...\n")
+
+        img_mejorada, exif = mejorar_imagen(ruta_imagen, escala, contraste, nitidez)
+        
+        if img_mejorada is None:
+            pausar()
+            return
+
+        # Guardar con máxima calidad y preservando EXIF
+        save_params = {"quality": 95, "optimize": True, "progressive": True}
+        if exif:
+            save_params["exif"] = exif
+
+        img_mejorada.save(salida, **save_params)
+
+        print(Fore.GREEN + f"\nImagen mejorada con éxito!")
+        print(Fore.WHITE + f"Guardado como: {os.path.basename(salida)}")
+        print(Fore.CYAN + f"Resolución: {img_mejorada.width}×{img_mejorada.height} píxeles")
 
         preguntar_eliminar_original(ruta_imagen)
-        pausar()
 
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error al mejorar imagen: {e}" + Style.RESET_ALL)
-        pausar()
-
+        print(Fore.RED + f"\nError inesperado: {e}")
+    finally:
+        pausar()  # ← Siempre espera Enter al final

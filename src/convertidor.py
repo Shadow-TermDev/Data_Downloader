@@ -1,129 +1,115 @@
 import os
 import shutil
-import pyfiglet
+from pyfiglet import Figlet
 from colorama import Fore, Style, init
-from src.plugins.gestor_convertidor import convertir_video, convertir_video_a_audio, convertir_imagen, convertir_audio
-from src.plugins.animaciones import ocultar_cursor, mostrar_cursor  # Importamos funciones
 
-# Inicializar colorama
+# Importamos directamente los gestores reales (sin puente)
+from src.plugins.convertidor.video import convertir_video
+from src.plugins.convertidor.video_a_audio import convertir_video_a_audio
+from src.plugins.convertidor.imagen import convertir_imagen
+from src.plugins.convertidor.audio import convertir_audio
+
+from src.utils import buscar_archivo, pausar
+from src.plugins.animaciones import ocultar_cursor, mostrar_cursor
+
 init(autoreset=True)
 
-# Ruta base para la búsqueda de archivos (ajustable)
-RUTA_BASE = "/storage/emulated/0/"
-
-# Función para limpiar la pantalla en Windows y Linux/Termux
 def limpiar_pantalla():
     os.system("cls" if os.name == "nt" else "clear")
 
-# Función para centrar texto en la terminal
 def centrar_texto(texto):
     try:
-        ancho_terminal = shutil.get_terminal_size().columns
+        ancho = shutil.get_terminal_size().columns
     except:
-        ancho_terminal = 80  # Ancho por defecto si no hay terminal
-    return texto.center(ancho_terminal)
+        ancho = 80
+    return texto.center(ancho)
 
-# Mostrar menú del convertidor
 def mostrar_submenu_convertidor():
     limpiar_pantalla()
-    # Banner "Converter"
-    titulo = pyfiglet.figlet_format("Converter", font="slant")
-    for linea in titulo.split("\n"):
+
+    # Título moderno
+    figlet = Figlet(font="slant")
+    titulo = figlet.renderText("Converter")
+    for linea in titulo.splitlines():
         print(Fore.YELLOW + centrar_texto(linea))
     print(Fore.CYAN + centrar_texto("VIDEO, AUDIO & IMAGE CONVERTER\n"))
 
+    # Cuadro perfecto (igual que mejorador y descargador)
+    ancho = 52
+    print(Fore.MAGENTA + "╭" + "─" * (ancho - 2) + "╮")
+    
     opciones = [
-        (Fore.GREEN, "1 - Convertir Video 🎬"),
-        (Fore.GREEN, "2 - Video a Audio 🎵"),
-        (Fore.GREEN, "3 - Convertir Imagen 🖼️ "),
-        (Fore.GREEN, "4 - Convertir Audio 🔊"),
-        (Fore.RED, "5 - Volver al menú principal"),
+        "1 - Convertir video ",
+        "2 - Video → Audio ",
+        "3 - Convertir imagen ",
+        "4 - Convertir audio ",
+        "5 - Volver al menú principal "
     ]
 
-    # Dibujar el cuadro del menú
-    print(Fore.MAGENTA + "╭" + "─" * 48)
-    for color, texto in opciones:
-        print(Fore.MAGENTA + "│" + color + " " + texto)
-    print(Fore.MAGENTA + "╰" + "─" * 48)
+    for i, texto in enumerate(opciones):
+        color = Fore.GREEN if i < 4 else Fore.RED
+        print(Fore.MAGENTA + "│ " + color + texto.ljust(ancho - 4) + Fore.MAGENTA + " │")
+    
+    print(Fore.MAGENTA + "╰" + "─" * (ancho - 2) + "╯\n")
 
-    # Mostrar cursor antes de solicitar entrada
     mostrar_cursor()
     print(Fore.CYAN + "  -> Ingresa el número de la opción: ", end="")
 
-# Función para buscar archivos en la ruta base
-def buscar_archivo(nombre_archivo):
-    archivos_encontrados = []
-    for root, _, files in os.walk(RUTA_BASE):
-        if nombre_archivo in files:
-            archivos_encontrados.append(os.path.join(root, nombre_archivo))
-
-    if not archivos_encontrados:
-        print(Fore.RED + f"❌ Archivo '{nombre_archivo}' no encontrado." + Style.RESET_ALL)
-        return None
-
-    if len(archivos_encontrados) == 1:
-        return archivos_encontrados[0]
-
-    print(Fore.YELLOW + "\n📂 Se encontraron múltiples archivos con el mismo nombre:")
-    for i, archivo in enumerate(archivos_encontrados, 1):
-        print(Fore.CYAN + f"  {i}. {archivo}")
-
-    while True:
-        mostrar_cursor()
-        seleccion = input(Fore.CYAN + "\n🔢 Ingresa el número del archivo que deseas usar: ").strip()
-        ocultar_cursor()
-        if seleccion.isdigit() and 1 <= int(seleccion) <= len(archivos_encontrados):
-            return archivos_encontrados[int(seleccion) - 1]
-        print(Fore.RED + "❌ Selección inválida. Inténtalo de nuevo." + Style.RESET_ALL)
-
-# Función principal del menú de conversión
 def menu_convertidor():
-    ocultar_cursor()  # Ocultar cursor al entrar al menú
-
-    opciones_convertidor = {
-        "1": ("📂 Ingresa el nombre del video: ", convertir_video, ["mp4", "mkv", "avi"]),
-        "2": ("📂 Ingresa el nombre del video para extraer el audio: ", convertir_video_a_audio, ["mp3", "wav", "ogg"]),
-        "3": ("🖼️   Ingresa el nombre de la imagen: ", convertir_imagen, ["png", "jpg", "webp"]),
-        "4": ("🔊 Ingresa el nombre del audio: ", convertir_audio, ["mp3", "wav", "ogg"]),
-        "5": None,  # Opción para salir
-    }
+    ocultar_cursor()
 
     while True:
         mostrar_submenu_convertidor()
-
-        # Mostrar cursor antes de la entrada del usuario
-        mostrar_cursor()
-        opcion = input(Style.RESET_ALL).strip()
+        opcion = input().strip()
         ocultar_cursor()
 
-        if opcion in opciones_convertidor:
-            if opcion == "5":
-                return  # Volver al menú principal
+        if opcion == "5":
+            return
 
-            mensaje, funcion_convertir, formatos_permitidos = opciones_convertidor[opcion]
+        if opcion not in ["1", "2", "3", "4"]:
+            print(Fore.RED + centrar_texto("Opción no válida. Inténtalo de nuevo.") + Style.RESET_ALL)
+            input(Fore.YELLOW + centrar_texto("Presiona Enter para continuar..."))
+            continue
 
+        # Configuración por opción
+        configs = {
+            "1": ("Ingresa el nombre del video: ", convertir_video, ["mp4", "mkv", "avi", "mov", "webm"]),
+            "2": ("Ingresa el nombre del video: ", convertir_video_a_audio, ["mp3", "wav", "ogg", "aac", "flac"]),
+            "3": ("Ingresa el nombre de la imagen: ", convertir_imagen, ["png", "jpg", "jpeg", "webp", "bmp"]),
+            "4": ("Ingresa el nombre del audio: ", convertir_audio, ["mp3", "wav", "ogg", "aac", "flac"])
+        }
+
+        mensaje, funcion, formatos = configs[opcion]
+
+        mostrar_cursor()
+        print()
+        nombre = input(Fore.YELLOW + f"{mensaje}").strip()
+        ocultar_cursor()
+
+        if not nombre:
+            print(Fore.RED + centrar_texto("Nombre vacío.") + Style.RESET_ALL)
+            continue
+
+        ruta = buscar_archivo(nombre)
+        if not ruta:
+            continue
+
+        # Pedir formato
+        while True:
             mostrar_cursor()
-            nombre_archivo = input(Fore.YELLOW + f"\n{mensaje}").strip()
+            fmt = input(Fore.CYAN + f"Formato de salida ({', '.join(formatos)}): " + Style.RESET_ALL).strip().lower()
             ocultar_cursor()
 
-            ruta_archivo = buscar_archivo(nombre_archivo)
-            if ruta_archivo:
-                while True:
-                    mostrar_cursor()
-                    formato = input(f"🎥 Ingresa el formato de salida ({', '.join(formatos_permitidos)}): ").strip().lower()
-                    ocultar_cursor()
+            if fmt in formatos:
+                try:
+                    funcion(ruta, fmt)
+                except Exception as e:
+                    print(Fore.RED + centrar_texto(f"Error en conversión: {e}") + Style.RESET_ALL)
+                break
+            else:
+                print(Fore.RED + centrar_texto(f"Formato no soportado. Opciones: {', '.join(formatos)}") + Style.RESET_ALL)
 
-                    if formato in formatos_permitidos:
-                        try:
-                            funcion_convertir(ruta_archivo, formato)
-                        except Exception as e:
-                            print(Fore.RED + f"\n⚠️ Error en la conversión: {e}" + Style.RESET_ALL)
-                        break
-                    print(Fore.RED + f"❌ Formato inválido. Debe ser uno de: {', '.join(formatos_permitidos)}" + Style.RESET_ALL)
-        else:
-            print(Fore.RED + "\n⚠️ Opción no válida. Inténtalo de nuevo." + Style.RESET_ALL)
+        # Pausa final automática
 
-# Ejecutar solo si el script se ejecuta directamente
 if __name__ == "__main__":
     menu_convertidor()
-
