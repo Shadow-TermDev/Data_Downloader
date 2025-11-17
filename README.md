@@ -10,11 +10,9 @@
 
 **Descarga, mejora y convierte videos, audios e imágenes con calidad profesional — TODO desde tu celular.**
 
-**Creado por Shadow-TermDev — El Lord de Termux Perú**
+**Creado por Shadow-TermDev — El Lord de Termux**
 
-</div>
-
-## Características ÉPICAS
+## Características del PROYECTO
 
 - Descarga sin marca de agua: TikTok, Instagram, YouTube, Facebook  
 - Mejorador de video (720p → 4K), audio (voz cristalina + graves profundos) e imágenes  
@@ -30,20 +28,52 @@
 - Interfaz hermosa con colorama + rich  
 - 100% funcional en Termux Android  
 
-## Instalación ULTRA FÁCIL (3 pasos)
+</div>
 
-### 1. Instala Termux (si aún no lo tienes)
+### 1. Instala Termux si no lo tienes desde F-Droid (versión oficial)
 
-[![Descargar Termux desde F-Droid](https://img.shields.io/badge/Download-Termux%20(F--Droid)-25A362?style=for-the-badge&logo=f-droid)](https://f-droid.org/packages/com.termux/)
-[![Descargar F-Droid](https://img.shields.io/badge/Download-F--Droid-3D7AB9?style=for-the-badge&logo=f-droid)](https://f-droid.org/F-Droid.apk)
+<a href="https://f-droid.org/packages/com.termux/" target="_blank">
+  <img src="https://img.shields.io/badge/Download-Termux%20(F--Droid)-25A362?style=for-the-badge&logo=f-droid" alt="Termux F-Droid"/>
+</a>
 
-> Abre Termux por primera vez y acepta los permisos de almacenamiento
+<a href="https://f-droid.org/F-Droid.apk" target="_blank">
+  <img src="https://img.shields.io/badge/Download-F--Droid-3D7AB9?style=for-the-badge&logo=f-droid" alt="F-Droid APK"/>
+</a>
 
-### 2. Instala Data_Downloader
+### 2. Abre Termux y ejecuta los siguientes comandos uno por uno
+
+## Dale permisos de almacenamiento a Termux
+```bash
+termux-setup-storage
+```
+
+## Actualiza los repositorios y paquetes
+```bash
+pkg update -y && pkg upgrade -y
+```
+
+## Instala los recursos necesarios para clonar el proyecto
+```bash
+pkg install python ffmpeg git -y
+```
+
+## Clona el proyecto o repositorio
+```bash
+git clone https://github.com/Shadow-TermDev/Data_Downloader.git
+```
+
+## Entra a la carpeta del proyecto
 
 ```bash
-pkg update -y && pkg upgrade -y && pkg install python ffmpeg git -y && \
-git clone https://github.com/Shadow-TermDev/Data_Downloader.git && \
-cd Data_Downloader && \
-pip install -r requirements.txt && \
+cd Data_Downloader
+```
+
+## Instala los requerimientos de python
+```bash
+pip install -r requirements.txt
+```
+
+## Ejecuta el programa y disfruta!!!!
+```bash
 python main.py
+```
