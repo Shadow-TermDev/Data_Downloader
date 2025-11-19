@@ -1,32 +1,22 @@
 <div align="center">
 
 # Data_Downloader
-### El convertidor y descargador MÁS POTENTE para Termux
+### Una buena opción si quieres sencillez y rapidez 
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-1.4-success.svg?style=for-the-badge)
 
-**Descarga, mejora y convierte videos, audios e imágenes con calidad profesional — TODO desde tu celular.**
+**Descarga, mejora y convierte videos, audios e imágenes — TODO desde tu celular.**
 
 **Creado por Shadow-TermDev — El Lord de Termux**
 
 ## Características del PROYECTO
 
-- Descarga sin marca de agua: TikTok, Instagram, YouTube, Facebook  
-- Mejorador de video (720p → 4K), audio (voz cristalina + graves profundos) e imágenes  
-- Convertidor profesional:  
-
-  → Video → Audio (con portada)  
-  
-  → Audio → MP3 / FLAC / M4A / OGG / WAV (con portada)  
-  
-  → Imagen → PNG / WEBP / JPG / GIF / ICO  
-  
-- Progreso en tiempo real  
-- Interfaz hermosa con colorama + rich  
-- 100% funcional en Termux Android  
+- Descarga videos sin marca de agua
+- Descarga música
+- Convierte tus archivos a los formatos que desees 
 
 </div>
 
@@ -57,7 +47,7 @@ pkg update -y && pkg upgrade -y
 pkg install python ffmpeg git -y
 ```
 
-- Clona el proyecto o repositorio
+- Clona el repositorio
 ```text
 git clone https://github.com/Shadow-TermDev/Data_Downloader.git
 ```
