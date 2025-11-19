@@ -43,36 +43,36 @@
 ### 2. Abre Termux y ejecuta los siguientes comandos uno por uno
 
 - Dale permisos de almacenamiento a Termux
-```bash
+```text
 termux-setup-storage
 ```
 
 - Actualiza los paquetes
-```bash
+```text
 pkg update -y && pkg upgrade -y
 ```
 
 - Instala los recursos necesarios para clonar el repositorio
-```bash
+```text
 pkg install python ffmpeg git -y
 ```
 
 - Clona el proyecto o repositorio
-```bash
+```text
 git clone https://github.com/Shadow-TermDev/Data_Downloader.git
 ```
 
 - Entra a la carpeta del proyecto
-```bash
+```text
 cd Data_Downloader
 ```
 
 - Instala los requerimientos de python
-```bash
+```text
 pip install -r requirements.txt
 ```
 
 - Ejecuta el programa y disfruta!!!!
-```bash
+```text
 python main.py
 ```
