@@ -1,0 +1,67 @@
+{
+  "1": {
+    "titulo": "Descargar Contenido",
+    "mensaje": "El módulo de descarga te permite obtener videos, audios e imágenes desde diversas plataformas de internet con la mejor calidad disponible.",
+    "pasos": [
+      "Selecciona 'Descargar contenido' en el menú principal",
+      "Elige el tipo de contenido: Video, Audio o Imagen",
+      "Pega la URL completa del contenido que deseas descargar",
+      "Selecciona la calidad deseada de las opciones disponibles",
+      "Espera a que la descarga se complete",
+      "Encuentra tu archivo en la carpeta correspondiente"
+    ],
+    "consejos": [
+      "Para videos: YouTube, TikTok, Instagram y más plataformas son compatibles",
+      "Para audio: Se descarga en MP3 con portada y metadatos incluidos",
+      "Para imágenes: La calidad original siempre se preserva",
+      "Las descargas se guardan en carpetas organizadas automáticamente",
+      "Si una descarga falla, verifica que la URL sea correcta y pública",
+      "Actualiza yt-dlp regularmente: pip install -U yt-dlp"
+    ]
+  },
+  "2": {
+    "titulo": "Convertir Archivos",
+    "mensaje": "El convertidor te permite transformar tus archivos multimedia a diferentes formatos manteniendo la mejor calidad posible y preservando metadatos.",
+    "pasos": [
+      "Selecciona 'Convertir archivos' en el menú principal",
+      "Elige el tipo de conversión que necesitas",
+      "Ingresa el nombre del archivo (no necesita ruta completa)",
+      "El sistema buscará el archivo en tu dispositivo",
+      "Selecciona el formato de salida deseado",
+      "Espera a que la conversión termine",
+      "Decide si quieres conservar o eliminar el archivo original"
+    ],
+    "consejos": [
+      "Videos: MP4, MKV, AVI, MOV, WebM disponibles",
+      "Audio: MP3, WAV, AAC, FLAC, OGG, M4A con portada preservada",
+      "Imágenes: PNG, JPG, WebP, BMP, GIF, TIFF, ICO soportados",
+      "Video → Audio: Extrae audio manteniendo la portada del video",
+      "La conversión preserva metadatos cuando es posible",
+      "Formatos sin pérdida como FLAC y PNG mantienen máxima calidad",
+      "OGG y otros formatos avanzados requieren conversión de portada"
+    ]
+  },
+  "3": {
+    "titulo": "Mejorar Calidad",
+    "mensaje": "El módulo de mejora te permite aumentar la resolución y calidad de tus archivos mediante técnicas avanzadas de procesamiento.",
+    "pasos": [
+      "Selecciona 'Mejorar calidad' en el menú principal",
+      "Elige el tipo de archivo: Video, Audio o Imagen",
+      "Ingresa el nombre del archivo a mejorar",
+      "Selecciona el nivel de mejora deseado",
+      "El proceso puede tomar tiempo dependiendo del archivo",
+      "Revisa el resultado y compáralo con el original",
+      "Decide si conservar o eliminar el archivo original"
+    ],
+    "consejos": [
+      "Videos: Upscaling hasta 4K con algoritmo Lanczos de alta calidad",
+      "Audio: Aumento de bitrate hasta 320kbps preservando portada",
+      "Imágenes: Escalado hasta ×2.0 con filtros de nitidez y contraste",
+      "El proceso de mejora es intensivo, ten paciencia",
+      "Mayor calidad = mayor tamaño de archivo",
+      "Recomendado usar nivel 'Balanceado' para mejores resultados",
+      "Videos pequeños (360p, 480p) se benefician más del upscaling",
+      "El audio no puede mejorar más allá de su calidad original"
+    ]
+  }
+}
