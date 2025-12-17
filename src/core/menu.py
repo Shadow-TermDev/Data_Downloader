@@ -87,11 +87,12 @@ class MenuHandler:
                 input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
                 continue
             
+            # Las funciones ya tienen su propio pausar(), no agregamos otro
             try:
                 funciones[opcion](url)
             except Exception as e:
                 print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
-                input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
+                # No pausar aquí porque las funciones ya lo hacen
     
     def menu_convertidor(self):
         """Menú de conversión de archivos"""
@@ -144,6 +145,7 @@ class MenuHandler:
             
             ruta = buscar_archivo(nombre)
             if not ruta:
+                # buscar_archivo ya muestra error, solo continuamos
                 continue
             
             while True:
@@ -156,6 +158,7 @@ class MenuHandler:
                         funcion(ruta, fmt)
                     except Exception as e:
                         print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
+                        # No pausar, las funciones ya lo hacen
                     break
                 else:
                     print(Fore.RED + centrar_texto(f"Formato no soportado. Opciones: {', '.join(formatos)}") + Style.RESET_ALL)
@@ -213,14 +216,14 @@ class MenuHandler:
             
             ruta = buscar_archivo(nombre)
             if not ruta:
-                input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
+                # buscar_archivo ya muestra mensaje y pausa
                 continue
             
             try:
                 funciones[opcion](ruta)
             except Exception as e:
                 print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
-                input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
+                # No pausar, las funciones ya lo hacen
     
     def menu_ayuda(self):
         """Menú de ayuda"""

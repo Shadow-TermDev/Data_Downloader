@@ -59,13 +59,21 @@ def obtener_calidades_video(url: str) -> list:
             for f in info.get('formats', []):
                 # Solo formatos con video Y audio
                 if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
-                    height = f.get('height') or 0
-                    vcodec = f.get('vcodec', 'h264')[:10]  # Limitar longitud
+                    height = f.get('height', 0)  # Default 0 si es None
+                    if height is None:
+                        height = 0
+                    
+                    vcodec = f.get('vcodec', 'h264')
+                    if vcodec:
+                        vcodec = str(vcodec)[:10]  # Limitar longitud
+                    else:
+                        vcodec = 'h264'
+                    
                     ext = f.get('ext', 'mp4')
                     filesize = f.get('filesize') or f.get('filesize_approx', 0)
                     
                     # Calcular tamaño
-                    if filesize > 0:
+                    if filesize and filesize > 0:
                         size_mb = f"{filesize / (1024*1024):.1f} MB"
                     else:
                         size_mb = "?? MB"
@@ -85,7 +93,8 @@ def obtener_calidades_video(url: str) -> list:
                         formatos.append((f['format_id'], label, size_mb, height))
             
             # Ordenar: mayor resolución primero, luego por codec
-            formatos.sort(key=lambda x: (x[3], 1 if 'HEVC' in x[1] else 0), reverse=True)
+            # Asegurar que height sea int
+            formatos.sort(key=lambda x: (x[3] if x[3] is not None else 0, 1 if 'HEVC' in x[1] else 0), reverse=True)
             
             return [(fid, label, size) for fid, label, size, _ in formatos[:15]]
     

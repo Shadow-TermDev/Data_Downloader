@@ -60,6 +60,10 @@ def buscar_archivo(nombre_archivo: str, carpeta_base: Path = STORAGE_BASE) -> Op
                 return archivo_seleccionado
         
         print(Fore.RED + f"❌ {MESSAGES['file_not_found']}: '{nombre_archivo}'")
+        
+        # Pausar antes de volver
+        from src.utils.helpers import pausar
+        pausar()
         return None
     
     except PermissionError:

@@ -105,3 +105,7 @@ pip install -r requirements.txt
 ```bash
 python src/main.py
 ```
+# O con, luego solo './start'
+```bash
+chmod +x start && ./start
+```
