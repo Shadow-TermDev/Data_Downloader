@@ -105,8 +105,13 @@ pip install -r requirements.txt
 ```bash
 python src/main.py
 ```
-# O con, luego solo './start'
+# O con
 ```bash
 chmod +x start && ./start
 ```
+# Luego solo
+```bash
+./start
+```
+
 ### Una vez ejecutado el programa, puedes descargar audios y videos usando el link...
