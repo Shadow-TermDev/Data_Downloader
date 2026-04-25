@@ -29,15 +29,12 @@ def convertir_video_a_audio(ruta_video: Path, formato: str):
     try:
         if not ruta_video.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
-            pausar()
             return
         
-        # Validar formato
         formato = formato.lower()
         if formato not in AUDIO_FORMATS:
             print(Fore.RED + f"\n❌ Formato no soportado: {formato}")
             print(Fore.CYAN + f"Formatos disponibles: {', '.join(AUDIO_FORMATS)}")
-            pausar()
             return
         
         # Generar nombre de salida

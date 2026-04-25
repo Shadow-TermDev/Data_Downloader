@@ -116,25 +116,20 @@ def mejorar_calidad_imagen(ruta_imagen: Path):
     try:
         if not ruta_imagen.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_imagen}")
-            pausar()
             return
         
         print(Fore.CYAN + f"\n📸 Procesando: {ruta_imagen.name}")
         
-        # Seleccionar nivel de mejora
         escala, contraste, nitidez = seleccionar_calidad()
         
-        # Generar nombre de salida
         ruta_salida = generar_nombre_salida(ruta_imagen, "_mejorada")
         
         print(Fore.YELLOW + f"\n⬆️  Mejorando imagen ×{escala}...")
         print(Fore.CYAN + "⏳ Aplicando nitidez, contraste y upscaling...\n")
         
-        # Mejorar imagen
         img_mejorada, exif = mejorar_imagen(ruta_imagen, escala, contraste, nitidez)
         
         if img_mejorada is None:
-            pausar()
             return
         
         # Guardar con máxima calidad

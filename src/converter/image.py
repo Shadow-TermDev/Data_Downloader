@@ -41,18 +41,15 @@ def convertir_imagen(ruta_imagen: Path, formato: str):
     try:
         if not ruta_imagen.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_imagen}")
-            pausar()
             return
         
-        # Validar formato
         formato = formato.lower()
         if formato == "jpeg":
-            formato = "jpg"  # PIL usa "jpg" internamente
+            formato = "jpg"
         
         if formato not in IMAGE_FORMATS:
             print(Fore.RED + f"\n❌ Formato no soportado: {formato.upper()}")
             print(Fore.CYAN + f"Formatos disponibles: {', '.join(sorted(IMAGE_FORMATS))}")
-            pausar()
             return
         
         # Generar nombre de salida

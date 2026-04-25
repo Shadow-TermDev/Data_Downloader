@@ -62,7 +62,6 @@ def mejorar_calidad_video(ruta_video: Path):
     try:
         if not ruta_video.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
-            pausar()
             return
         
         # Seleccionar resolución

@@ -119,8 +119,9 @@ class DataDownloader:
                 
                 # Delegar al manejador de menús
                 if not self.menu_handler.manejar_opcion(opcion):
+                    from src.utils.helpers import pausar
                     print(Fore.RED + centrar_texto(MESSAGES["invalid_option"]) + Style.RESET_ALL)
-                    input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
+                    pausar(mostrar=False)
         
         except KeyboardInterrupt:
             print("\n")

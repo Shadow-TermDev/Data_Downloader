@@ -84,9 +84,10 @@ def descargar_imagen(url: str):
     ocultar_cursor()
     
     try:
-        print(Fore.YELLOW + "\n🔍 Obteniendo información de la imagen...")
+        print(Fore.CYAN + "\n╔" + "═" * 50 + "╗")
+        print(Fore.CYAN + "║" + Fore.YELLOW + " 🖼️  DESCARGANDO IMAGEN ".center(50) + Fore.CYAN + "║")
+        print(Fore.CYAN + "╚" + "═" * 50 + "╝\n")
         
-        # Headers para evitar bloqueos
         headers = {
             'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 '
                          '(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
@@ -95,9 +96,6 @@ def descargar_imagen(url: str):
             'Referer': 'https://www.google.com/'
         }
         
-        # Descarga con streaming
-        print(Fore.CYAN + "⏳ Descargando imagen...")
-        
         response = requests.get(url, stream=True, headers=headers, timeout=30)
         response.raise_for_status()
         
@@ -105,45 +103,33 @@ def descargar_imagen(url: str):
         recibido = 0
         chunks = []
         
-        # Descargar con progreso
-        for chunk in response.iter_content(chunk_size=65536):  # 64KB chunks
+        print(Fore.CYAN + "▓" + "░" * 25 + "▓ 0%", end="\r")
+        
+        for chunk in response.iter_content(chunk_size=65536):
             if chunk:
                 chunks.append(chunk)
                 recibido += len(chunk)
                 if total_size > 0:
-                    mostrar_progreso_descarga(recibido, total_size)
+                    percent = (recibido / total_size) * 100
+                    barra = int(percent / 100 * 25)
+                    print(Fore.CYAN + f"▓{'█'*barra}{'░'*(25-barra)}▓ {percent:.0f}%", end="\r")
         
-        print(f"\n{Fore.GREEN}✅ Descarga completada")
-        
-        # Procesar imagen
-        print(Fore.CYAN + "🖼️  Procesando imagen...")
         data = BytesIO(b''.join(chunks))
         
         try:
             img = Image.open(data)
         except UnidentifiedImageError:
             print(Fore.RED + "\n❌ El enlace no es una imagen válida")
-            print(Fore.YELLOW + "💡 Verifica que la URL apunte directamente a una imagen")
-            pausar()
             return
         
-        # Información de la imagen
         ancho, alto = img.size
         formato = img.format or "Desconocido"
         modo = img.mode
         tamaño_mb = total_size / (1024 * 1024) if total_size > 0 else recibido / (1024 * 1024)
         
-        print(Fore.CYAN + f"\n📊 Información de la imagen:")
-        print(Fore.WHITE + f"   🖼️  Resolución: {ancho} × {alto} píxeles")
-        print(Fore.WHITE + f"   📦 Formato: {formato}")
-        print(Fore.WHITE + f"   🎨 Modo de color: {modo}")
-        print(Fore.WHITE + f"   💾 Tamaño: {tamaño_mb:.2f} MB")
-        
-        # Generar nombre y guardar
         nombre_limpio = generar_nombre_limpio(url, formato)
         ruta_final = IMAGES_DIR / nombre_limpio
         
-        # Guardar con máxima calidad
         save_params = {}
         if formato == "PNG":
             save_params = {"compress_level": 6, "optimize": True}
@@ -152,45 +138,37 @@ def descargar_imagen(url: str):
         elif formato == "WEBP":
             save_params = {"quality": 95, "method": 6}
         
-        print(Fore.YELLOW + "\n💾 Guardando imagen...")
         img.save(ruta_final, **save_params)
         
-        # Verificar que se guardó correctamente
         if ruta_final.exists():
             tamaño_guardado = ruta_final.stat().st_size / (1024 * 1024)
             
-            print(Fore.GREEN + f"\n🎉 ¡Imagen descargada exitosamente!")
-            print(Fore.WHITE + f"   📝 Nombre: {nombre_limpio}")
-            print(Fore.WHITE + f"   💾 Tamaño final: {tamaño_guardado:.2f} MB")
-            print(Fore.WHITE + f"   📁 Carpeta: {IMAGES_DIR}")
-            print(Fore.CYAN + f"\n💡 Tip: Encuentra tu imagen en Pictures/Picture_Downloader")
+            print(Fore.GREEN + "\n\n╭" + "─" * 50 + "╮")
+            print(Fore.GREEN + "│" + Fore.WHITE + " ✅ DESCARGA COMPLETADA ".center(50) + Fore.GREEN + "│")
+            print(Fore.GREEN + "├" + "─" * 50 + "┤")
+            print(Fore.GREEN + "│" + Fore.WHITE + f" 📐 Resolución: {ancho} × {alto}".ljust(51) + Fore.GREEN + "│")
+            print(Fore.GREEN + "│" + Fore.WHITE + f" 📦 Formato: {formato}".ljust(51) + Fore.GREEN + "│")
+            print(Fore.GREEN + "│" + Fore.WHITE + f" 💾 Tamaño: {tamaño_guardado:.2f} MB".ljust(51) + Fore.GREEN + "│")
+            print(Fore.GREEN + "│" + Fore.CYAN + " 📁 Pictures/Picture_Downloader".ljust(51) + Fore.GREEN + "│")
+            print(Fore.GREEN + "╰" + "─" * 50 + "╯")
         else:
             print(Fore.RED + "\n❌ Error al guardar la imagen")
     
     except requests.exceptions.Timeout:
-        print(Fore.RED + "\n❌ Timeout: La imagen tardó demasiado en responder")
-        print(Fore.YELLOW + "💡 Verifica tu conexión a internet")
+        print(Fore.RED + "\n❌ Timeout: La imagen tardó demasiado")
     
     except requests.exceptions.ConnectionError:
         print(Fore.RED + "\n❌ Error de conexión")
-        print(Fore.YELLOW + "💡 Verifica tu conexión a internet")
     
     except requests.exceptions.HTTPError as e:
         status_code = e.response.status_code
         print(Fore.RED + f"\n❌ Error HTTP {status_code}")
-        
-        if status_code == 404:
-            print(Fore.YELLOW + "💡 La imagen no existe o fue eliminada")
-        elif status_code == 403:
-            print(Fore.YELLOW + "💡 Acceso prohibido. La imagen puede estar protegida")
-        elif status_code == 429:
-            print(Fore.YELLOW + "💡 Demasiadas solicitudes. Espera unos minutos")
     
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Descarga cancelada por el usuario")
+        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
+        print(Fore.RED + f"\n❌ Error: {str(e)[:50]}")
     
     finally:
         pausar()

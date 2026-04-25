@@ -28,14 +28,11 @@ def convertir_video(ruta_video: Path, formato: str):
     try:
         if not ruta_video.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
-            pausar()
             return
         
-        # Validar formato
         if formato.lower() not in VIDEO_FORMATS:
             print(Fore.RED + f"\n❌ Formato no soportado: {formato}")
             print(Fore.CYAN + f"Formatos disponibles: {', '.join(VIDEO_FORMATS)}")
-            pausar()
             return
         
         # Generar nombre de salida

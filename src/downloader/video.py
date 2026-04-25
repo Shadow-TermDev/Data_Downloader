@@ -11,7 +11,8 @@ from colorama import Fore, Style
 
 from config.settings import VIDEOS_DIR, MESSAGES
 from src.utils.animations import ocultar_cursor, mostrar_cursor
-from src.utils.helpers import pausar, mostrar_progreso
+from src.utils.helpers import pausar
+from src.utils import pot_token, mostrar_progreso
 
 
 def progreso_hook(d):
@@ -19,91 +20,147 @@ def progreso_hook(d):
     if d['status'] == 'downloading':
         try:
             percent = d.get('_percent_str', '0%').strip()
-            speed = d.get('_speed_str', '0 B/s').strip()
-            eta = d.get('_eta_str', 'Calculando...').strip()
+            speed = d.get('_speed_str', 'N/A').strip()
+            eta = d.get('_eta_str', '...').strip()
             
-            barra_ancho = 30
+            barra_ancho = 25
             porcentaje_num = float(percent.replace('%', ''))
             bloques = int((porcentaje_num / 100) * barra_ancho)
             barra = "█" * bloques + "░" * (barra_ancho - bloques)
             
-            print(f"\r{Fore.CYAN}[{barra}] {percent} | {speed} | ETA: {eta}", end="", flush=True)
+            print(f"\r{Fore.CYAN}▓{barra}▓ {percent.ljust(5)} │ {speed.ljust(10)} │ ETA: {eta}", end="", flush=True)
         except:
             pass
     elif d['status'] == 'finished':
-        print(f"\n{Fore.GREEN}✅ Descarga completada. Procesando...")
+        print(f"\r{Fore.GREEN}✓ Completado".ljust(60) + "\n")
+
+
+def es_tiktok(url: str) -> bool:
+    """Detecta si la URL es de TikTok"""
+    return 'tiktok.com' in url.lower() or 'vm.tiktok.com' in url.lower()
+
+
+def obtener_opciones_ytdlp(es_tiktok: bool = False, cookies_path: str = None) -> dict:
+    """
+    Obtiene opciones optimizadas para yt-dlp
+    Ayuda a evitar detección de bot
+    """
+    opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'extract_flat': False,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+        },
+    }
+    
+    if cookies_path:
+        opts['cookiefile'] = cookies_path
+    
+    return opts
+
+
+def intentar_descarga_fallback(url: str, tipo: str = "video") -> dict:
+    """
+    Intenta descargar con diferentes métodos si falla el principal
+    """
+    metodos = [
+        {},  # Intento normal
+        {'extractor_args': {'youtube': {'player_client': 'android'}}},
+        {'extractor_args': {'youtube': {'player_client': 'web_creator'}}},
+        {'extractor_args': {'youtube': {'player_skip': 'webpage,configs'}}},
+    ]
+    
+    for i, extra_opts in enumerate(metodos):
+        ydl_opts = obtener_opciones_ytdlp()
+        ydl_opts.update(extra_opts)
+        
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                return {'success': True, 'info': info, 'method': i + 1}
+        except Exception as e:
+            if i == len(metodos) - 1:
+                return {'success': False, 'error': str(e)}
+            continue
+    
+    return {'success': False, 'error': 'Todos los métodos fallaron'}
 
 
 def obtener_calidades_video(url: str) -> list:
     """
     Obtiene las calidades disponibles para un video
-    
-    Args:
-        url: URL del video
-        
-    Returns:
-        Lista de tuplas (format_id, label, size)
+    Intenta múltiples métodos para evitar errores
     """
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': False
-    }
+    pot_iniciado = pot_token.iniciar_si_necesario()
     
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            formatos = []
-            visto = set()
-            
-            for f in info.get('formats', []):
-                # Solo formatos con video Y audio
-                if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
-                    height = f.get('height', 0)  # Default 0 si es None
-                    if height is None:
-                        height = 0
-                    
-                    vcodec = f.get('vcodec', 'h264')
-                    if vcodec:
-                        vcodec = str(vcodec)[:10]  # Limitar longitud
-                    else:
-                        vcodec = 'h264'
-                    
-                    ext = f.get('ext', 'mp4')
-                    filesize = f.get('filesize') or f.get('filesize_approx', 0)
-                    
-                    # Calcular tamaño
-                    if filesize and filesize > 0:
-                        size_mb = f"{filesize / (1024*1024):.1f} MB"
-                    else:
-                        size_mb = "?? MB"
-                    
-                    # Crear etiqueta descriptiva
-                    if height > 0:
-                        codec_label = "HEVC" if "hevc" in vcodec.lower() or "h265" in vcodec.lower() else "H264"
-                        label = f"{height}p {codec_label}"
-                    else:
-                        label = f"{ext.upper()}"
-                    
-                    # Evitar duplicados por altura y codec
-                    key = (height, codec_label if height > 0 else ext)
-                    
-                    if key not in visto:
-                        visto.add(key)
-                        formatos.append((f['format_id'], label, size_mb, height))
-            
-            # Ordenar: mayor resolución primero, luego por codec
-            # Asegurar que height sea int
-            formatos.sort(key=lambda x: (x[3] if x[3] is not None else 0, 1 if 'HEVC' in x[1] else 0), reverse=True)
-            
-            return [(fid, label, size) for fid, label, size, _ in formatos[:15]]
+    metodos = [
+        pot_token.obtener_opts_video() if pot_iniciado else {},
+        {},
+    ]
     
-    except yt_dlp.utils.DownloadError as e:
-        print(Fore.RED + f"\n❌ Error al acceder al video: {str(e)}")
-        return []
-    except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
-        return []
+    ultimo_error = None
+    
+    for i, extra_opts in enumerate(metodos):
+        ydl_opts = obtener_opciones_ytdlp(es_tiktok(url))
+        ydl_opts.update(extra_opts)
+        
+        if es_tiktok(url):
+            ydl_opts['extractor_args'] = {'tiktok': {'downloadaddr': True}}
+        
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                
+                if es_tiktok(url):
+                    formatos = []
+                    for f in info.get('formats', []):
+                        if f.get('url'):
+                            height = f.get('height', 0) or 0
+                            size = f.get('filesize') or f.get('filesize_approx', 0)
+                            size_mb = f"{size / (1024*1024):.1f} MB" if size else "?? MB"
+                            label = f"{height}p" if height > 0 else "HD"
+                            formatos.append((f['format_id'], label, size_mb))
+                    return formatos[:8]
+                
+                formatos = []
+                visto = set()
+                
+                for f in info.get('formats', []):
+                    if f.get('vcodec') != 'none' and f.get('acodec') != 'none':
+                        height = f.get('height', 0) or 0
+                        vcodec = str(f.get('vcodec', 'h264'))[:10] or 'h264'
+                        ext = f.get('ext', 'mp4')
+                        filesize = f.get('filesize') or f.get('filesize_approx', 0)
+                        size_mb = f"{filesize / (1024*1024):.1f} MB" if filesize else "?? MB"
+                        
+                        if height > 0:
+                            codec_label = "HEVC" if "hevc" in vcodec.lower() else "H264"
+                            label = f"{height}p {codec_label}"
+                        else:
+                            label = f"{ext.upper()}"
+                        
+                        key = (height, codec_label if height > 0 else ext)
+                        
+                        if key not in visto:
+                            visto.add(key)
+                            formatos.append((f['format_id'], label, size_mb))
+                
+                formatos.sort(key=lambda x: int(x[1].split('p')[0]) if 'p' in x[1] else 0, reverse=True)
+                return formatos[:15]
+                
+        except Exception as e:
+            ultimo_error = str(e)
+            continue
+    
+    if ultimo_error:
+        if "Sign in to confirm" in ultimo_error:
+            pot_token.mensaje_error_youtube()
+        else:
+            print(Fore.RED + f"\n❌ Error: {ultimo_error[:60]}")
+
+
 
 
 def seleccionar_calidad(calidades: list) -> str:
@@ -118,29 +175,29 @@ def seleccionar_calidad(calidades: list) -> str:
     """
     if not calidades:
         print(Fore.RED + "\n❌ No hay formatos de video disponibles.")
-        print(Fore.YELLOW + "💡 Tip: Algunos servicios (TikTok) pueden requerir herramientas especializadas.")
         return None
     
-    print(Fore.CYAN + f"\n📺 Calidades disponibles:")
-    print(Fore.MAGENTA + "─" * 50)
+    print(Fore.CYAN + "\n╔" + "═" * 48 + "╗")
+    print(Fore.CYAN + "║" + Fore.YELLOW + " 📺 CALIDADES DISPONIBLES ".center(48) + Fore.CYAN + "║")
+    print(Fore.CYAN + "╠" + "═" * 48 + "╣")
     
-    for i, (fid, label, size) in enumerate(calidades, 1):
-        # Destacar la mejor calidad
+    for i, (fid, label, size) in enumerate(calidades[:8], 1):
         color = Fore.GREEN if i == 1 else Fore.WHITE
-        estrella = "⭐ " if i == 1 else "   "
-        print(f"{color}{estrella}{i}. {label.ljust(15)} | Tamaño: {size}")
+        estrella = "★" if i == 1 else " "
+        linea = f"║ {color}{estrella} {i}. {label.ljust(12)} │ Tamaño: {size.ljust(10)}{Fore.CYAN}║"
+        print(linea)
     
-    print(Fore.MAGENTA + "─" * 50)
+    print(Fore.CYAN + "╚" + "═" * 48 + "╝")
     
     while True:
         mostrar_cursor()
-        sel = input(Fore.CYAN + f"\n➜ Elige [1-{len(calidades)}] (1=mejor calidad): " + Style.RESET_ALL).strip()
+        sel = input(Fore.CYAN + "\n➜ Elige calidad [1-8]: " + Style.RESET_ALL).strip()
         ocultar_cursor()
         
-        if sel.isdigit() and 1 <= int(sel) <= len(calidades):
+        if sel.isdigit() and 1 <= int(sel) <= min(len(calidades), 8):
             return calidades[int(sel) - 1][0]
         
-        print(Fore.RED + "❌ Opción inválida. Intenta de nuevo.")
+        print(Fore.RED + "❌ Opción inválida")
 
 
 def descargar_video(url: str):
@@ -153,30 +210,33 @@ def descargar_video(url: str):
     ocultar_cursor()
     
     try:
-        print(Fore.YELLOW + "\n🔍 Analizando video y calidades disponibles...")
-        print(Fore.CYAN + "Esto puede tomar unos segundos...\n")
+        print(Fore.CYAN + "\n╔" + "═" * 50 + "╗")
+        print(Fore.CYAN + "║" + Fore.YELLOW + " 🎬 ANALIZANDO VIDEO ".center(50) + Fore.CYAN + "║")
+        print(Fore.CYAN + "╚" + "═" * 50 + "╝\n")
         
         calidades = obtener_calidades_video(url)
         
         if not calidades:
-            pausar()
+            print(Fore.RED + "\n❌ No se pudieron obtener las calidades disponibles")
             return
         
-        # Advertencia si la mejor calidad es baja
         mejor_calidad = calidades[0][1]
         if '360p' in mejor_calidad or '480p' in mejor_calidad:
-            print(Fore.YELLOW + f"\n⚠️  La máxima calidad disponible es: {mejor_calidad}")
-            print(Fore.CYAN + "   Esto es normal en algunos servicios.")
+            print(Fore.YELLOW + f" ⚠️  Mejor calidad disponible: {mejor_calidad}")
         
         formato_id = seleccionar_calidad(calidades)
         
         if not formato_id:
-            pausar()
             return
         
-        # Configuración optimizada para descarga
+        # Fallback progresivo para el formato
+        if formato_id.isdigit():
+            formato_descarga = f'{formato_id}+bestaudio/{formato_id}/bestaudio/best'
+        else:
+            formato_descarga = f'{formato_id}+bestaudio/best'
+        
         ydl_opts = {
-            'format': f'{formato_id}+bestaudio/best',
+            'format': formato_descarga,
             'outtmpl': str(VIDEOS_DIR / '%(title)s.%(ext)s'),
             'merge_output_format': 'mp4',
             'postprocessors': [{
@@ -184,54 +244,66 @@ def descargar_video(url: str):
                 'add_metadata': True,
             }],
             'embed_thumbnail': True,
-            'embed_subs': True,
-            'writesubtitles': True,
             'progress_hooks': [progreso_hook],
-            'quiet': False,
-            'no_warnings': False,
+            'quiet': True,
+            'no_warnings': True,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+            },
         }
         
-        print(Fore.YELLOW + f"\n🎬 Descargando video en calidad seleccionada...")
-        print(Fore.CYAN + "Progreso:\n")
+        # Agregar PO Token si está disponible
+        pot_opts = pot_token.obtener_opts_pot()
+        if pot_opts:
+            ydl_opts.update(pot_opts)
+            print(Fore.CYAN + " ✓ PO Token activo")
+        
+        if es_tiktok(url):
+            ydl_opts['extractor_args'] = {'tiktok': {'downloadaddr': True}}
+            print(Fore.YELLOW + " ⚠️  TikTok detectado")
+        
+        print(Fore.GREEN + "\n╔" + "═" * 50 + "╗")
+        print(Fore.GREEN + "║" + Fore.YELLOW + " 📥 DESCARGANDO VIDEO ".center(50) + Fore.GREEN + "║")
+        print(Fore.GREEN + "╚" + "═" * 50 + "╝\n")
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            titulo = info.get('title', 'video')
+            titulo = info.get('title', 'video')[:40]
             duracion = info.get('duration', 0)
             
             min_duracion = duracion // 60
             seg_duracion = duracion % 60
         
-        print(Fore.GREEN + f"\n\n🎉 ¡Video descargado exitosamente!")
-        print(Fore.WHITE + f"   📝 Título: {titulo}")
-        print(Fore.WHITE + f"   ⏱️  Duración: {min_duracion}:{seg_duracion:02d}")
-        print(Fore.WHITE + f"   📁 Carpeta: {VIDEOS_DIR}")
-        print(Fore.CYAN + f"\n💡 Tip: Encuentra tu video en la carpeta VMovies/Videos_Downloader")
+        print(Fore.GREEN + "\n╭" + "─" * 50 + "╮")
+        print(Fore.GREEN + "│" + Fore.WHITE + " ✅ DESCARGA COMPLETADA ".center(50) + Fore.GREEN + "│")
+        print(Fore.GREEN + "├" + "─" * 50 + "┤")
+        print(Fore.GREEN + "│" + Fore.WHITE + f" 📝 Título: {titulo}".ljust(51) + Fore.GREEN + "│")
+        print(Fore.GREEN + "│" + Fore.WHITE + f" ⏱️  Duración: {min_duracion}:{seg_duracion:02d}".ljust(51) + Fore.GREEN + "│")
+        print(Fore.GREEN + "│" + Fore.CYAN + f" 📁 Guardado en: VMovies/Videos_Downloader".ljust(51) + Fore.GREEN + "│")
+        print(Fore.GREEN + "╰" + "─" * 50 + "╯")
     
     except yt_dlp.utils.DownloadError as e:
         error_msg = str(e)
-        print(Fore.RED + f"\n❌ Error en la descarga:")
+        print(Fore.RED + "\n╭" + "─" * 50 + "╮")
+        print(Fore.RED + "│" + Fore.WHITE + " ❌ ERROR DE DESCARGA ".center(50) + Fore.RED + "│")
+        print(Fore.RED + "├" + "─" * 50 + "┤")
         
         if "429" in error_msg:
-            print(Fore.YELLOW + "   → Demasiadas solicitudes. Espera unos minutos.")
+            print(Fore.RED + "│" + Fore.YELLOW + " Demasiadas solicitudes. Espera unos minutos.".ljust(51) + Fore.RED + "│")
         elif "403" in error_msg or "Forbidden" in error_msg:
-            print(Fore.YELLOW + "   → Acceso bloqueado. El video puede ser privado o restringido.")
+            print(Fore.RED + "│" + Fore.YELLOW + " Acceso bloqueado. Video privado o restringido.".ljust(51) + Fore.RED + "│")
         elif "404" in error_msg:
-            print(Fore.YELLOW + "   → Video no encontrado. Verifica la URL.")
+            print(Fore.RED + "│" + Fore.YELLOW + " Video no encontrado. Verifica la URL.".ljust(51) + Fore.RED + "│")
         else:
-            print(Fore.YELLOW + f"   → {error_msg[:100]}")
+            print(Fore.RED + "│" + Fore.YELLOW + f" {error_msg[:45]}".ljust(51) + Fore.RED + "│")
         
-        print(Fore.CYAN + "\n💡 Sugerencias:")
-        print(Fore.WHITE + "   • Verifica que la URL sea correcta")
-        print(Fore.WHITE + "   • Actualiza yt-dlp: pip install -U yt-dlp")
-        print(Fore.WHITE + "   • Algunos servicios requieren herramientas especializadas")
+        print(Fore.RED + "╰" + "─" * 50 + "╯")
     
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Descarga cancelada por el usuario")
+        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
-        print(Fore.CYAN + "\n💡 Intenta actualizar yt-dlp: pip install -U yt-dlp")
+        print(Fore.RED + f"\n❌ Error: {str(e)[:50]}")
     
     finally:
         pausar()

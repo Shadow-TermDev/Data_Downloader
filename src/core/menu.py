@@ -37,6 +37,43 @@ class MenuHandler:
             return True
         return False
     
+    def _obtener_url(self, tipo: str) -> str:
+        """
+        Obtiene y valida una URL del usuario
+        
+        Args:
+            tipo: Tipo de contenido ('video', 'audio', 'imagen')
+            
+        Returns:
+            URL válida o cadena vacía
+        """
+        mensajes = {
+            "video": "Ingresa la URL del video",
+            "audio": "Ingresa la URL del audio",
+            "imagen": "Ingresa la URL de la imagen"
+        }
+        
+        iconos = {
+            "video": "🎬",
+            "audio": "🎵",
+            "imagen": "🖼️"
+        }
+        
+        print()
+        print(Fore.CYAN + f"{iconos[tipo]} {mensajes[tipo]}: " + Style.RESET_ALL, end="")
+        
+        url = input().strip()
+        
+        if not url:
+            print(Fore.RED + f"❌ {MESSAGES['empty_input']}")
+            return ""
+        
+        if not url.startswith(('http://', 'https://')):
+            print(Fore.RED + "❌ La URL debe comenzar con http:// o https://")
+            return ""
+        
+        return url
+
     def menu_descargador(self):
         """Menú de descarga de contenido"""
         from src.downloader.video import descargar_video
@@ -66,33 +103,21 @@ class MenuHandler:
                 continue
             
             funciones = {
-                "1": descargar_video,
-                "2": descargar_audio,
-                "3": descargar_imagen
+                "1": ("video", descargar_video),
+                "2": ("audio", descargar_audio),
+                "3": ("imagen", descargar_imagen)
             }
             
-            mensajes = {
-                "1": "Ingresa la URL del video: ",
-                "2": "Ingresa la URL del audio: ",
-                "3": "Ingresa la URL de la imagen: "
-            }
-            
-            mostrar_cursor()
-            print()
-            url = input(Fore.YELLOW + mensajes[opcion]).strip()
-            ocultar_cursor()
+            tipo, funcion = funciones[opcion]
+            url = self._obtener_url(tipo)
             
             if not url:
-                print(Fore.RED + centrar_texto(MESSAGES["empty_input"]) + Style.RESET_ALL)
-                input(Fore.YELLOW + centrar_texto(MESSAGES["press_enter"]))
                 continue
             
-            # Las funciones ya tienen su propio pausar(), no agregamos otro
             try:
-                funciones[opcion](url)
+                funcion(url)
             except Exception as e:
                 print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
-                # No pausar aquí porque las funciones ya lo hacen
     
     def menu_convertidor(self):
         """Menú de conversión de archivos"""

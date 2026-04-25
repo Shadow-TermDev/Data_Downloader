@@ -10,7 +10,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.4.2-success.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.5.0-success.svg?style=for-the-badge)
 
 **Descarga, mejora y convierte videos, audios e imágenes — TODO desde tu celular.**
 
@@ -32,6 +32,8 @@
 - ✅ Imágenes con resolución original
 - ✅ Sin marcas de agua
 - ✅ Metadatos y portadas incluidos
+- ✅ Soporte para PO Token (anti-bot)
+- ✅ Interfaz mejorada y más limpia
 
 ### 🔄 Convertidor
 - ✅ **Video:** MP4, MKV, AVI, MOV, WebM

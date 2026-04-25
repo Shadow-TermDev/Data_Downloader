@@ -37,10 +37,19 @@ def centrar_texto(texto: str) -> str:
     return texto.center(ancho)
 
 
-def pausar():
-    """Pausa la ejecución hasta que el usuario presione Enter"""
-    mostrar_cursor()
-    input(Fore.CYAN + "\n🔹 Presiona Enter para continuar..." + Style.RESET_ALL)
+def pausar(mensaje: str = None, mostrar: bool = True):
+    """
+    Pausa la ejecución hasta que el usuario presione Enter
+    
+    Args:
+        mensaje: Mensaje personalizado (opcional)
+        mostrar: Si True muestra el cursor antes de pausar
+    """
+    if mostrar:
+        mostrar_cursor()
+    
+    msg = mensaje or "\n🔹 Presiona Enter para continuar..."
+    input(Fore.CYAN + msg + Style.RESET_ALL)
     ocultar_cursor()
 
 
@@ -81,25 +90,56 @@ def formatear_bytes(bytes_size: int) -> str:
     return f"{bytes_size:.2f} PB"
 
 
-def validar_url(url: str) -> bool:
+def validar_url(url: str) -> tuple:
     """
-    Valida que una URL tenga formato correcto
+    Valida que una URL tenga formato correcto y retorna detalles
     
     Args:
         url: URL a validar
         
     Returns:
-        True si es válida
+        Tupla (es_valida, mensaje_error)
     """
     import re
+    
+    if not url:
+        return (False, "La URL no puede estar vacía")
+    
+    if not url.startswith(('http://', 'https://')):
+        return (False, "La URL debe comenzar con http:// o https://")
+    
     patron = re.compile(
-        r'^https?://'  # http:// o https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # dominio
-        r'localhost|'  # localhost
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # IP
-        r'(?::\d+)?'  # puerto opcional
+        r'^https?://'
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'
+        r'localhost|'
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+        r'(?::\d+)?'
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-    return bool(patron.match(url))
+    
+    if not patron.match(url):
+        return (False, "El formato de la URL no es válido")
+    
+    return (True, None)
+
+
+def validar_url_corta(url: str) -> bool:
+    """
+    Valida rápidamente si es una URL (sin mensaje detallado)
+    
+    Args:
+        url: URL a validar
+        
+    Returns:
+        True si parece válida
+    """
+    if not url:
+        return False
+    
+    url_lower = url.lower().strip()
+    return (
+        url_lower.startswith('http://') or 
+        url_lower.startswith('https://')
+    ) and len(url) > 10
 
 
 def mostrar_ayuda(opcion: str):

@@ -63,7 +63,6 @@ def mejorar_calidad_audio(ruta_audio: Path):
     try:
         if not ruta_audio.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_audio}")
-            pausar()
             return
         
         # Seleccionar bitrate

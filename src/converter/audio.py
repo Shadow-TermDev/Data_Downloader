@@ -28,15 +28,12 @@ def convertir_audio(ruta_audio: Path, formato: str):
     try:
         if not ruta_audio.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_audio}")
-            pausar()
             return
         
-        # Validar formato
         formato = formato.lower()
         if formato not in AUDIO_FORMATS:
             print(Fore.RED + f"\n❌ Formato no soportado: {formato}")
             print(Fore.CYAN + f"Formatos disponibles: {', '.join(AUDIO_FORMATS)}")
-            pausar()
             return
         
         # Generar nombre de salida con extensión correcta

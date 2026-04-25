@@ -12,7 +12,7 @@ from pathlib import Path
 # ============================================================
 
 PROJECT_NAME = "Data Downloader"
-VERSION = "v1.4.4"
+VERSION = "v1.5.0"
 AUTHOR = "Shadow-TermDev"
 AUTHOR_TITLE = "El Lord de Termux"
 WEBSITE = "Shadow-TermDev.github.io"
@@ -136,14 +136,18 @@ ANIMATION_SPEED = 0.05
 MESSAGES = {
     "welcome": f"{PROJECT_NAME} {VERSION}",
     "goodbye": "¡Gracias por usar Data Downloader!",
-    "invalid_option": "Opción no válida. Inténtalo de nuevo.",
-    "empty_input": "Entrada vacía. Por favor ingresa un valor.",
-    "file_not_found": "Archivo no encontrado.",
-    "download_success": "Descarga completada con éxito!",
-    "conversion_success": "Conversión completada con éxito!",
-    "enhancement_success": "Mejora completada con éxito!",
-    "error_occurred": "Ocurrió un error inesperado.",
-    "press_enter": "Presiona Enter para continuar..."
+    "invalid_option": "Opción no válida",
+    "empty_input": "Entrada vacía. Por favor ingresa un valor",
+    "file_not_found": "Archivo no encontrado",
+    "download_success": "Descarga completada",
+    "conversion_success": "Conversión completada",
+    "enhancement_success": "Mejora completada",
+    "error_occurred": "Ocurrió un error",
+    "press_enter": "Presiona Enter para continuar...",
+    "processing": "Procesando...",
+    "downloading": "Descargando...",
+    "converting": "Convirtiendo...",
+    "saving": "Guardando..."
 }
 
 # ============================================================
