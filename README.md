@@ -1,8 +1,5 @@
 <div align="center">
 
-# Data_Downloader
-### Una buena opción si quieres sencillez y rapidez 
-=======
 # 🎬 Data Downloader
 
 ### **La herramienta definitiva para descargar, convertir y mejorar multimedia en Termux**
@@ -16,13 +13,7 @@
 
 [🌐 Sitio Web](https://Shadow-TermDev.github.io) • [📖 Documentación](./docs) • [🐛 Reportar Bug](https://github.com/Shadow-TermDev/Data_Downloader/issues) • [✨ Solicitar Feature](https://github.com/Shadow-TermDev/Data_Downloader/issues)
 
-## Características del PROYECTO
-
-- Descarga videos sin marca de agua
-- Descarga música
-- Convierte tus archivos a los formatos que desees 
-
-</div>
+---
 
 ## 🌟 Características
 
@@ -58,62 +49,48 @@
 
 ### 📱 Instalación Paso a Paso
 
-<a href="https://f-droid.org/packages/com.termux/" target="_blank">
-  <img src="https://img.shields.io/badge/Download-Termux%20(F--Droid)-25A362?style=for-the-badge&logo=f-droid" alt="Termux F-Droid"/>
-</a>
+1. **Abre Termux y ejecuta:**
 
-#### 1. Configurar Termux
+   ```bash
+   termux-setup-storage
+   ```
 
-### 2. Abre Termux y ejecuta los siguientes comandos uno por uno
+2. **Actualiza paquetes e instala dependencias:**
 
-# Dar permisos de almacenamiento
-```bash
-termux-setup-storage
-```
+   ```bash
+   pkg update -y && pkg upgrade -y
+   pkg install python ffmpeg git -y
+   ```
 
-# Actualizar paquetes
-```bash
-pkg update -y && pkg upgrade -y
-```
+3. **Clona el repositorio e instala:**
 
-# Instala los recursos necesarios para clonar el repositorio
-```bash
-pkg install python ffmpeg git -y
-```
+   ```bash
+   git clone https://github.com/Shadow-TermDev/Data_Downloader.git
+   cd Data_Downloader
+   pip install -r requirements.txt
+   ```
 
-# Instalar dependencias del sistema
-```bash
-pkg install python ffmpeg git -y
-```
+4. **Ejecuta el programa:**
 
-#### 2. Instalar Data Downloader
+   ```bash
+   python src/main.py
+   ```
+   
+   O usa el script de inicio:
+   ```bash
+   chmod +x start && ./start
+   ```
 
-# Clonar el repositorio
-```bash
-git clone https://github.com/Shadow-TermDev/Data_Downloader.git
-```
+---
 
-# Entrar al directorio
-```bash
-cd Data_Downloader
-```
+## 📖 Uso
 
-# Instalar dependencias de Python
-```bash
-pip install -r requirements.txt
-```
+Una vez ejecutado el programa, puedes descargar audios y videos usando el enlace correspondiente. Sigue las instrucciones en pantalla para seleccionar el formato y la calidad deseada.
 
-# Ejecutar el programa
-```bash
-python src/main.py
-```
-# O con
-```bash
-chmod +x start && ./start
-```
-# Luego solo
-```bash
-./start
-```
+---
 
-### Una vez ejecutado el programa, puedes descargar audios y videos usando el link...
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+</div>
