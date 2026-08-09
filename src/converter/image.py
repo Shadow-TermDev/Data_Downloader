@@ -4,14 +4,14 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 from pathlib import Path
 from PIL import Image
-from colorama import Fore, Style
+from colorama import Fore
 
 from config.settings import IMAGE_FORMATS
-from src.utils.animations import ocultar_cursor, mostrar_cursor
+from src.utils.animations import ocultar_cursor
 from src.utils.helpers import pausar
+from src.utils.boxes import print_success_box
 from src.core.file_manager import eliminar_archivo_seguro
 
 
@@ -64,7 +64,7 @@ def convertir_imagen(ruta_imagen: Path, formato: str):
             ancho, alto = img.size
             modo_original = img.mode
             
-            print(Fore.CYAN + f"📊 Información original:")
+            print(Fore.CYAN + "📊 Información original:")
             print(Fore.WHITE + f"   Resolución: {ancho} × {alto} px")
             print(Fore.WHITE + f"   Modo: {modo_original}")
             
@@ -108,19 +108,26 @@ def convertir_imagen(ruta_imagen: Path, formato: str):
             tamaño_original = ruta_imagen.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
             reduccion = ((tamaño_original - tamaño_nuevo) / tamaño_original * 100)
-            
-            print(Fore.GREEN + f"\n🎉 ¡Imagen convertida exitosamente!")
-            print(Fore.WHITE + f"   📝 Nombre: {ruta_salida.name}")
-            print(Fore.WHITE + f"   📦 Formato: {formato.upper()}")
-            print(Fore.WHITE + f"   💾 Tamaño original: {tamaño_original:.2f} MB")
-            print(Fore.WHITE + f"   💾 Tamaño final: {tamaño_nuevo:.2f} MB")
-            
+
+            lineas = [
+                f"📝 Nombre: {ruta_salida.name}",
+                f"📦 Formato: {formato.upper()}",
+                f"💾 Tamaño original: {tamaño_original:.2f} MB",
+                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+            ]
+            colores = [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE]
+
             if reduccion > 0:
-                print(Fore.GREEN + f"   📉 Reducción: {reduccion:.1f}%")
+                lineas.append(f"📉 Reducción: {reduccion:.1f}%")
+                colores.append(Fore.GREEN)
             elif reduccion < 0:
-                print(Fore.YELLOW + f"   📈 Aumento: {abs(reduccion):.1f}%")
-            
-            print(Fore.WHITE + f"   📁 Ubicación: {ruta_salida.parent}")
+                lineas.append(f"📈 Aumento: {abs(reduccion):.1f}%")
+                colores.append(Fore.YELLOW)
+
+            lineas.append(f"📁 {ruta_salida.parent}")
+            colores.append(Fore.CYAN)
+
+            print_success_box("✅ IMAGEN CONVERTIDA EXITOSAMENTE", lineas, colores)
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_imagen)

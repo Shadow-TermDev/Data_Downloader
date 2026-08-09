@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from colorama import Fore, Style
 
-from config.settings import ASSETS_DIR, MESSAGES
+from config.settings import ASSETS_DIR
 from src.utils.animations import mostrar_cursor, ocultar_cursor
 
 
@@ -31,7 +31,7 @@ def centrar_texto(texto: str) -> str:
     """
     try:
         ancho = shutil.get_terminal_size().columns
-    except:
+    except Exception:
         ancho = 80
     
     return texto.center(ancho)
@@ -194,7 +194,7 @@ def mostrar_ayuda(opcion: str):
     
     # Consejos si existen
     if "consejos" in ayuda:
-        print(Fore.YELLOW + f"\n💡 Consejos:\n")
+        print(Fore.YELLOW + "\n💡 Consejos:\n")
         for consejo in ayuda["consejos"]:
             print(Fore.WHITE + f"  • {consejo}")
     

@@ -7,9 +7,6 @@ Web: https://Shadow-TermDev.github.io
 import sys
 import time
 import json
-import os
-from pathlib import Path
-from typing import Optional
 
 from config.settings import ASSETS_DIR, DEFAULT_TRANSITION, ANIMATION_SPEED
 
@@ -149,7 +146,7 @@ def transicion_slide(texto: str, color_final: str = "\033[37m", velocidad: float
     try:
         import shutil
         ancho = shutil.get_terminal_size(fallback=(80, 24)).columns
-    except:
+    except Exception:
         ancho = 80
     
     for i in range(len(texto) + 1):

@@ -8,10 +8,11 @@ from pathlib import Path
 from typing import Optional
 from colorama import Fore, Style
 
-from config.settings import STORAGE_BASE, MESSAGES
+from config.settings import STORAGE_BASE, VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR, MESSAGES
+from src.utils.boxes import print_warning_box
 
 
-def buscar_archivo(nombre_archivo: str, carpeta_base: Path = STORAGE_BASE) -> Optional[Path]:
+def buscar_archivo(nombre_archivo: str, carpeta_base: Path = None) -> Optional[Path]:
     """
     Busca un archivo en el almacenamiento del dispositivo
     
@@ -22,56 +23,71 @@ def buscar_archivo(nombre_archivo: str, carpeta_base: Path = STORAGE_BASE) -> Op
     Returns:
         Path del archivo si se encuentra, None en caso contrario
     """
-    print(Fore.CYAN + f"🔍 Buscando '{nombre_archivo}' en {carpeta_base}...")
+    if carpeta_base is None:
+        carpeta_base = STORAGE_BASE
+    
+    print(Fore.CYAN + f"🔍 Buscando '{nombre_archivo}'...")
+    
+    def _coincidencia_exacta(carpeta: Path):
+        try:
+            for archivo in carpeta.rglob(nombre_archivo):
+                if archivo.is_file():
+                    return archivo
+        except (PermissionError, OSError):
+            return None
+        return None
+    
+    # Buscar primero en los directorios de descarga de la app (más rápido)
+    for directorio in (VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR):
+        if directorio.exists():
+            encontrado = _coincidencia_exacta(directorio)
+            if encontrado:
+                print(Fore.GREEN + f"✅ Archivo encontrado: {encontrado}")
+                return encontrado
+    
+    # Si no, búsqueda general en el almacenamiento
+    encontrado = _coincidencia_exacta(carpeta_base)
+    if encontrado:
+        print(Fore.GREEN + f"✅ Archivo encontrado: {encontrado}")
+        return encontrado
+    
+    # Búsqueda con coincidencia parcial
+    print(Fore.YELLOW + "No se encontró coincidencia exacta. Buscando similares...")
+    
+    archivos_similares = []
+    nombre_lower = nombre_archivo.lower()
     
     try:
-        # Búsqueda recursiva eficiente
-        for archivo in carpeta_base.rglob(nombre_archivo):
-            if archivo.is_file():
-                print(Fore.GREEN + f"✅ Archivo encontrado: {archivo}")
-                return archivo
-        
-        # Si no se encuentra, buscar con coincidencia parcial
-        print(Fore.YELLOW + "No se encontró coincidencia exacta. Buscando similares...")
-        
-        archivos_similares = []
-        nombre_lower = nombre_archivo.lower()
-        
         for archivo in carpeta_base.rglob("*"):
             if archivo.is_file() and nombre_lower in archivo.name.lower():
                 archivos_similares.append(archivo)
                 if len(archivos_similares) >= 5:  # Limitar a 5 resultados
                     break
-        
-        if archivos_similares:
-            print(Fore.CYAN + "\n📁 Archivos similares encontrados:")
-            for i, archivo in enumerate(archivos_similares, 1):
-                print(Fore.WHITE + f"  {i}. {archivo.name}")
-                print(Fore.BLUE + f"     {archivo.parent}")
-            
-            from src.utils.animations import mostrar_cursor, ocultar_cursor
-            mostrar_cursor()
-            seleccion = input(Fore.YELLOW + "\n¿Usar alguno de estos? (1-5, Enter=ninguno): ").strip()
-            ocultar_cursor()
-            
-            if seleccion.isdigit() and 1 <= int(seleccion) <= len(archivos_similares):
-                archivo_seleccionado = archivos_similares[int(seleccion) - 1]
-                print(Fore.GREEN + f"✅ Usando: {archivo_seleccionado.name}")
-                return archivo_seleccionado
-        
-        print(Fore.RED + f"❌ {MESSAGES['file_not_found']}: '{nombre_archivo}'")
-        
-        # Pausar antes de volver
-        from src.utils.helpers import pausar
-        pausar()
-        return None
+    except (PermissionError, OSError):
+        pass
     
-    except PermissionError:
-        print(Fore.RED + "❌ Permiso denegado para acceder a algunos directorios")
-        return None
-    except Exception as e:
-        print(Fore.RED + f"❌ Error durante la búsqueda: {e}")
-        return None
+    if archivos_similares:
+        print(Fore.CYAN + "\n📁 Archivos similares encontrados:")
+        for i, archivo in enumerate(archivos_similares, 1):
+            print(Fore.WHITE + f"  {i}. {archivo.name}")
+            print(Fore.BLUE + f"     {archivo.parent}")
+        
+        from src.utils.animations import mostrar_cursor, ocultar_cursor
+        mostrar_cursor()
+        seleccion = input(Fore.YELLOW + "\n¿Usar alguno de estos? (1-5, Enter=ninguno): ").strip()
+        ocultar_cursor()
+        
+        if seleccion.isdigit() and 1 <= int(seleccion) <= len(archivos_similares):
+            archivo_seleccionado = archivos_similares[int(seleccion) - 1]
+            print(Fore.GREEN + f"✅ Usando: {archivo_seleccionado.name}")
+            return archivo_seleccionado
+    
+    print(Fore.RED + f"❌ {MESSAGES['file_not_found']}: '{nombre_archivo}'")
+    
+    # Pausar antes de volver
+    from src.utils.helpers import pausar
+    pausar()
+    return None
 
 
 def obtener_extension(ruta: Path) -> str:
@@ -205,9 +221,13 @@ def eliminar_archivo_seguro(ruta: Path) -> bool:
             return False
         
         info = obtener_info_archivo(ruta)
-        print(Fore.YELLOW + f"\n⚠️ ¿Eliminar '{info['nombre']}'? ({info['tamano_mb']} MB)")
-        print(Fore.GREEN + "  1 - Sí, eliminar")
-        print(Fore.RED + "  2 - No, conservar")
+        print_warning_box("⚠️  ¿ELIMINAR ARCHIVO?", [
+            f"📝 {info['nombre']}",
+            f"💾 {info['tamano_mb']} MB",
+            f"📁 {info['directorio']}",
+            "1 - Sí, eliminar",
+            "2 - No, conservar",
+        ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.GREEN, Fore.RED])
         
         from src.utils.animations import mostrar_cursor, ocultar_cursor
         mostrar_cursor()

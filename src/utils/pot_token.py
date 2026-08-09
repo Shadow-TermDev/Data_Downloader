@@ -31,7 +31,7 @@ def verificar_instalacion() -> bool:
             timeout=10
         )
         _instalado = result.returncode == 0
-    except:
+    except Exception:
         _instalado = False
     
     _verificado = True

@@ -1,7 +1,3 @@
-__pycache__/
-*.pyc
-.env
-
 # Python
 __pycache__/
 *.py[cod]
@@ -25,6 +21,9 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Secretos
+.env
 
 # Virtual Environment
 venv/
@@ -66,5 +65,4 @@ Thumbs.db
 desktop.ini
 
 # Archivos descargados (ejemplos)
-downloads/
 temp_downloads/

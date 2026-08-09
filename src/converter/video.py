@@ -4,14 +4,14 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 import subprocess
 from pathlib import Path
-from colorama import Fore, Style
+from colorama import Fore
 
 from config.settings import VIDEO_FORMATS
-from src.utils.animations import ocultar_cursor, mostrar_cursor
+from src.utils.animations import ocultar_cursor
 from src.utils.helpers import pausar
+from src.utils.boxes import print_success_box
 from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 
@@ -84,12 +84,13 @@ def convertir_video(ruta_video: Path, formato: str):
         # Verificar resultado
         if process.returncode == 0 and ruta_salida.exists():
             tamaño_mb = ruta_salida.stat().st_size / (1024 * 1024)
-            
-            print(Fore.GREEN + f"\n\n🎉 ¡Video convertido exitosamente!")
-            print(Fore.WHITE + f"   📝 Nombre: {ruta_salida.name}")
-            print(Fore.WHITE + f"   📦 Formato: {formato.upper()}")
-            print(Fore.WHITE + f"   💾 Tamaño: {tamaño_mb:.2f} MB")
-            print(Fore.WHITE + f"   📁 Ubicación: {ruta_salida.parent}")
+
+            print_success_box("✅ VIDEO CONVERTIDO EXITOSAMENTE", [
+                f"📝 Nombre: {ruta_salida.name}",
+                f"📦 Formato: {formato.upper()}",
+                f"💾 Tamaño: {tamaño_mb:.2f} MB",
+                f"📁 {ruta_salida.parent}",
+            ])
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_video)

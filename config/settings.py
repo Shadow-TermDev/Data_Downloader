@@ -4,7 +4,6 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 from pathlib import Path
 
 # ============================================================
@@ -12,7 +11,7 @@ from pathlib import Path
 # ============================================================
 
 PROJECT_NAME = "Data Downloader"
-VERSION = "v1.5.0"
+VERSION = "v1.6.0"
 AUTHOR = "Shadow-TermDev"
 AUTHOR_TITLE = "El Lord de Termux"
 WEBSITE = "Shadow-TermDev.github.io"
@@ -166,7 +165,10 @@ def create_directories():
     """Crea los directorios necesarios si no existen"""
     directories = [VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR, ASSETS_DIR]
     for directory in directories:
-        directory.mkdir(parents=True, exist_ok=True)
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+        except (PermissionError, OSError):
+            print(f"⚠️  No se pudo crear el directorio: {directory}")
 
 def get_output_dir(file_type: str) -> Path:
     """

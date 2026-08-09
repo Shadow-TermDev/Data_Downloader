@@ -4,14 +4,13 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 import subprocess
 from pathlib import Path
 from colorama import Fore, Style
 
-from config.settings import VIDEO_RESOLUTIONS
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import pausar
+from src.utils.boxes import print_success_box, print_selection_box
 from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 
@@ -22,21 +21,20 @@ def obtener_resolucion() -> str:
     Returns:
         String de resolución (ej: "1920x1080")
     """
-    print(Fore.CYAN + "\n📺 Selecciona la calidad de salida:")
-    print(Fore.MAGENTA + "─" * 40)
-    
     opciones = [
         ("1", "720p", "1280x720", "HD - Rápido"),
         ("2", "1080p", "1920x1080", "Full HD - Recomendado"),
         ("3", "4k", "3840x2160", "4K - Máxima calidad")
     ]
-    
+
+    lineas = []
+    colores = []
     for num, label, res, desc in opciones:
-        color = Fore.GREEN if num == "2" else Fore.WHITE
         estrella = "⭐ " if num == "2" else "   "
-        print(f"{color}{estrella}{num}. {label.upper()} ({res}) - {desc}")
-    
-    print(Fore.MAGENTA + "─" * 40)
+        lineas.append(f"{estrella}{num}. {label.upper()} ({res}) - {desc}")
+        colores.append(Fore.GREEN if num == "2" else Fore.WHITE)
+
+    print_selection_box("📺 CALIDAD DE SALIDA", lineas, colores)
     
     while True:
         mostrar_cursor()
@@ -75,10 +73,12 @@ def mejorar_calidad_video(ruta_video: Path):
         print(Fore.MAGENTA + "💡 Tip: Este proceso es intensivo. Ten paciencia.\n")
         
         # Comando FFmpeg optimizado para upscaling
+        # force_original_aspect_ratio=decrease evita distorsión y
+        # el filtro pad redondea a dimensiones pares (requerido por x264)
         comando = [
             "ffmpeg",
             "-i", str(ruta_video),
-            "-vf", f"scale={resolucion}:flags=lanczos",  # Filtro Lanczos de alta calidad
+            "-vf", f"scale={resolucion}:force_original_aspect_ratio=decrease:flags=lanczos,pad=ceil(iw/2)*2:ceil(ih/2)*2",
             "-c:v", "libx264",
             "-preset", "slow",  # Mejor calidad (más lento)
             "-crf", "18",  # Calidad alta (18-23 es bueno, menor=mejor)
@@ -109,15 +109,16 @@ def mejorar_calidad_video(ruta_video: Path):
         if process.returncode == 0 and ruta_salida.exists():
             tamaño_original = ruta_video.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
-            
-            print(Fore.GREEN + f"\n\n🎉 ¡Video mejorado exitosamente!")
-            print(Fore.WHITE + f"   📝 Nombre: {ruta_salida.name}")
-            print(Fore.WHITE + f"   📺 Resolución: {resolucion}")
-            print(Fore.WHITE + f"   💾 Tamaño original: {tamaño_original:.2f} MB")
-            print(Fore.WHITE + f"   💾 Tamaño final: {tamaño_nuevo:.2f} MB")
-            print(Fore.WHITE + f"   📁 Ubicación: {ruta_salida.parent}")
-            
-            print(Fore.CYAN + f"\n💡 El video fue mejorado con algoritmo Lanczos (alta calidad)")
+
+            print_success_box("✅ VIDEO MEJORADO EXITOSAMENTE", [
+                f"📝 Nombre: {ruta_salida.name}",
+                f"📺 Resolución: {resolucion}",
+                f"💾 Tamaño original: {tamaño_original:.2f} MB",
+                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+                f"📁 {ruta_salida.parent}",
+            ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN])
+
+            print(Fore.CYAN + "\n💡 El video fue mejorado con algoritmo Lanczos (alta calidad)")
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_video)

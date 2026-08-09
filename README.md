@@ -7,11 +7,11 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.5.0-success.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.6.0-success.svg?style=for-the-badge)
 
 **Descarga, mejora y convierte videos, audios e imágenes — TODO desde tu celular.**
 
-[🌐 Sitio Web](https://Shadow-TermDev.github.io) • [📖 Documentación](./docs) • [🐛 Reportar Bug](https://github.com/Shadow-TermDev/Data_Downloader/issues) • [✨ Solicitar Feature](https://github.com/Shadow-TermDev/Data_Downloader/issues)
+[🌐 Sitio Web](https://Shadow-TermDev.github.io) • [🐛 Reportar Bug](https://github.com/Shadow-TermDev/Data_Downloader/issues) • [✨ Solicitar Feature](https://github.com/Shadow-TermDev/Data_Downloader/issues)
 
 ---
 

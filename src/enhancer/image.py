@@ -4,14 +4,13 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 from pathlib import Path
 from PIL import Image, ImageEnhance, ImageFilter
 from colorama import Fore, Style
 
-from config.settings import IMAGE_SCALE_FACTORS
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import pausar
+from src.utils.boxes import print_success_box, print_selection_box
 from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 
@@ -22,21 +21,20 @@ def seleccionar_calidad() -> tuple:
     Returns:
         Tupla con (escala, contraste, nitidez)
     """
-    print(Fore.CYAN + "\n🖼️  Selecciona el nivel de mejora:")
-    print(Fore.MAGENTA + "─" * 50)
-    
     opciones = [
         ("1", (1.2, 1.1, 1.2), "×1.2 - Rápido", "Mejora ligera"),
         ("2", (1.5, 1.3, 1.5), "×1.5 - Balanceado", "Recomendado"),
         ("3", (2.0, 1.6, 2.0), "×2.0 - Máxima calidad", "Tarda más")
     ]
-    
+
+    lineas = []
+    colores = []
     for num, valores, label, desc in opciones:
-        color = Fore.GREEN if num == "2" else Fore.WHITE
         estrella = "⭐ " if num == "2" else "   "
-        print(f"{color}{estrella}{num}. {label} - {desc}")
-    
-    print(Fore.MAGENTA + "─" * 50)
+        lineas.append(f"{estrella}{num}. {label} - {desc}")
+        colores.append(Fore.GREEN if num == "2" else Fore.WHITE)
+
+    print_selection_box("🖼️  NIVEL DE MEJORA", lineas, colores)
     
     while True:
         mostrar_cursor()
@@ -151,16 +149,17 @@ def mejorar_calidad_imagen(ruta_imagen: Path):
         if ruta_salida.exists():
             tamaño_original = ruta_imagen.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
-            
-            print(Fore.GREEN + f"\n🎉 ¡Imagen mejorada exitosamente!")
-            print(Fore.WHITE + f"   📝 Nombre: {ruta_salida.name}")
-            print(Fore.WHITE + f"   📐 Resolución: {img_mejorada.width}×{img_mejorada.height} px")
-            print(Fore.WHITE + f"   ⬆️  Factor de escala: ×{escala}")
-            print(Fore.WHITE + f"   💾 Tamaño original: {tamaño_original:.2f} MB")
-            print(Fore.WHITE + f"   💾 Tamaño final: {tamaño_nuevo:.2f} MB")
-            print(Fore.WHITE + f"   📁 Ubicación: {ruta_salida.parent}")
-            
-            print(Fore.CYAN + f"\n💡 Se aplicaron filtros de nitidez, contraste y upscaling Lanczos")
+
+            print_success_box("✅ IMAGEN MEJORADA EXITOSAMENTE", [
+                f"📝 Nombre: {ruta_salida.name}",
+                f"📐 Resolución: {img_mejorada.width}×{img_mejorada.height} px",
+                f"⬆️  Factor de escala: ×{escala}",
+                f"💾 Tamaño original: {tamaño_original:.2f} MB",
+                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+                f"📁 {ruta_salida.parent}",
+            ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN])
+
+            print(Fore.CYAN + "\n💡 Se aplicaron filtros de nitidez, contraste y upscaling Lanczos")
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_imagen)

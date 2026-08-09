@@ -8,7 +8,8 @@ from typing import Callable, Dict
 
 from src.utils.helpers import limpiar_pantalla, centrar_texto
 from src.utils.animations import ocultar_cursor, mostrar_cursor
-from config.settings import BOX_WIDTH, MESSAGES
+from src.utils.boxes import print_menu_box
+from config.settings import MESSAGES
 
 
 class MenuHandler:
@@ -298,21 +299,18 @@ class MenuHandler:
             print(Fore.YELLOW + centrar_texto(linea))
         print(Fore.CYAN + centrar_texto(f"{subtitulo}\n"))
         
-        borde = "─" * (BOX_WIDTH - 2)
-        print(Fore.MAGENTA + "╭" + borde + "╮")
-        
+        colores = []
         for i, texto in enumerate(opciones):
             # Última opción siempre en rojo
             if i == len(opciones) - 1:
-                color = Fore.RED
+                colores.append(Fore.RED)
             elif color_opciones:
-                color = color_opciones
+                colores.append(color_opciones)
             else:
-                color = Fore.GREEN
-            
-            print(Fore.MAGENTA + "│ " + color + texto.ljust(BOX_WIDTH - 4) + Fore.MAGENTA + " │")
-        
-        print(Fore.MAGENTA + "╰" + borde + "╯\n")
+                colores.append(Fore.GREEN)
+
+        print_menu_box(opciones, colores)
+        print()
         
         mostrar_cursor()
         print(Fore.CYAN + "  -> Ingresa el número de la opción: ", end="")

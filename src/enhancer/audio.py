@@ -4,14 +4,13 @@ Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
-import os
 import subprocess
 from pathlib import Path
 from colorama import Fore, Style
 
-from config.settings import AUDIO_BITRATES
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import pausar
+from src.utils.boxes import print_success_box, print_selection_box
 from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 
@@ -22,21 +21,20 @@ def seleccionar_calidad() -> str:
     Returns:
         String de bitrate (ej: "320k")
     """
-    print(Fore.CYAN + "\n🎵 Selecciona la calidad de audio:")
-    print(Fore.MAGENTA + "─" * 45)
-    
     opciones = [
         ("1", "128k", "128 kbps", "Calidad estándar"),
         ("2", "256k", "256 kbps", "Alta calidad - Recomendado"),
         ("3", "320k", "320 kbps", "Calidad máxima")
     ]
-    
+
+    lineas = []
+    colores = []
     for num, bitrate, label, desc in opciones:
-        color = Fore.GREEN if num == "2" else Fore.WHITE
         estrella = "⭐ " if num == "2" else "   "
-        print(f"{color}{estrella}{num}. {label} - {desc}")
-    
-    print(Fore.MAGENTA + "─" * 45)
+        lineas.append(f"{estrella}{num}. {label} - {desc}")
+        colores.append(Fore.GREEN if num == "2" else Fore.WHITE)
+
+    print_selection_box("🎵 CALIDAD DE AUDIO", lineas, colores)
     
     while True:
         mostrar_cursor()
@@ -68,21 +66,24 @@ def mejorar_calidad_audio(ruta_audio: Path):
         # Seleccionar bitrate
         bitrate = seleccionar_calidad()
         
-        # Generar nombre de salida
-        ruta_salida = generar_nombre_salida(ruta_audio, "_mejorado")
+        # Generar nombre de salida (siempre MP3)
+        ruta_salida = generar_nombre_salida(ruta_audio, "_mejorado", "mp3")
         
         print(Fore.YELLOW + f"\n⬆️  Mejorando audio a {bitrate}...")
         print(Fore.CYAN + "⏳ Preservando portada y metadatos...\n")
         
-        # Comando FFmpeg
+        # Comando FFmpeg: convierte a MP3 y conserva portada y metadatos
         comando = [
             "ffmpeg",
             "-i", str(ruta_audio),
+            "-map", "0:a?",
+            "-map", "0:v?",
             "-c:a", "libmp3lame",
             "-b:a", bitrate,
-            "-map_metadata", "0",      # Copiar metadatos
-            "-map", "0",               # Copiar todas las pistas (incluye portada)
-            "-id3v2_version", "3",     # Versión de ID3 tags
+            "-c:v", "copy",
+            "-disposition:v", "attached_pic",
+            "-id3v2_version", "3",
+            "-map_metadata", "0",
             "-y",
             str(ruta_salida)
         ]
@@ -108,15 +109,16 @@ def mejorar_calidad_audio(ruta_audio: Path):
         if process.returncode == 0 and ruta_salida.exists():
             tamaño_original = ruta_audio.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
-            
-            print(Fore.GREEN + f"\n\n🎉 ¡Audio mejorado exitosamente!")
-            print(Fore.GREEN + "   🖼️  Portada preservada")
-            print(Fore.GREEN + "   📝 Metadatos preservados")
-            print(Fore.WHITE + f"   📝 Nombre: {ruta_salida.name}")
-            print(Fore.WHITE + f"   🎵 Bitrate: {bitrate}")
-            print(Fore.WHITE + f"   💾 Tamaño original: {tamaño_original:.2f} MB")
-            print(Fore.WHITE + f"   💾 Tamaño final: {tamaño_nuevo:.2f} MB")
-            print(Fore.WHITE + f"   📁 Ubicación: {ruta_salida.parent}")
+
+            print_success_box("✅ AUDIO MEJORADO EXITOSAMENTE", [
+                f"🖼️  Portada preservada",
+                f"📝 Metadatos preservados",
+                f"📝 Nombre: {ruta_salida.name}",
+                f"🎵 Bitrate: {bitrate}",
+                f"💾 Tamaño original: {tamaño_original:.2f} MB",
+                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+                f"📁 {ruta_salida.parent}",
+            ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN])
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_audio)

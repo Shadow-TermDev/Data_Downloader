@@ -3,11 +3,10 @@
 Data Downloader - Herramienta multimedia para Termux
 Autor: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Versión: 1.4.2
+Versión: 1.6.0
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Agregar el directorio raíz al path para imports
@@ -19,12 +18,13 @@ import pyfiglet
 # Importar configuración
 from config.settings import (
     PROJECT_NAME, VERSION, AUTHOR, AUTHOR_TITLE,
-    WEBSITE, REPOSITORY, BOX_WIDTH, MESSAGES
+    WEBSITE, REPOSITORY, MESSAGES
 )
 
 # Importar utilidades
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import limpiar_pantalla, centrar_texto
+from src.utils.boxes import print_box, print_menu_box
 
 # Importar módulos principales
 from src.core.menu import MenuHandler
@@ -52,43 +52,41 @@ class DataDownloader:
     
     def mostrar_info_proyecto(self):
         """Muestra información del proyecto en un cuadro"""
-        borde = "─" * (BOX_WIDTH - 2)
-        linea_vacia = Fore.MAGENTA + "│" + " " * (BOX_WIDTH - 2) + "│"
-        
-        print(Fore.MAGENTA + "╭" + borde + "╮")
-        print(Fore.MAGENTA + "│" + Fore.YELLOW + f" {PROJECT_NAME} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(linea_vacia)
-        print(Fore.MAGENTA + "│" + Fore.CYAN + " Creador: ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "│" + Fore.WHITE + f" {AUTHOR} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "│" + Fore.CYAN + f" {AUTHOR_TITLE} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(linea_vacia)
-        print(Fore.MAGENTA + "│" + Fore.CYAN + " Sitio Web: ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "│" + Fore.WHITE + f" {WEBSITE} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(linea_vacia)
-        print(Fore.MAGENTA + "│" + Fore.CYAN + " Repositorio: ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "│" + Fore.WHITE + f" {REPOSITORY} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(linea_vacia)
-        print(Fore.MAGENTA + "│" + Fore.CYAN + " Versión: ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "│" + Fore.WHITE + f" {VERSION} ".center(BOX_WIDTH - 2) + Fore.MAGENTA + "│")
-        print(Fore.MAGENTA + "╰" + borde + "╯\n")
-    
+        lineas = [
+            "",
+            "Creador:",
+            f"   {AUTHOR}  ·  {AUTHOR_TITLE}",
+            "",
+            "Sitio Web:",
+            f"   {WEBSITE}",
+            "",
+            "Repositorio:",
+            f"   {REPOSITORY}",
+            "",
+            "Versión:",
+            f"   {VERSION}",
+        ]
+        colores = [Fore.MAGENTA, Fore.CYAN, Fore.WHITE, Fore.MAGENTA,
+                   Fore.CYAN, Fore.WHITE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE,
+                   Fore.MAGENTA, Fore.CYAN, Fore.WHITE]
+
+        print_box(titulo=f" {PROJECT_NAME} ", lineas=lineas, borde=Fore.MAGENTA,
+                  color_titulo=Fore.YELLOW, colores=colores)
+
     def mostrar_menu_principal(self):
         """Muestra el menú principal con opciones"""
         opciones = [
-            (Fore.GREEN,  "1 - Descargar contenido"),
-            (Fore.BLUE,   "2 - Convertir archivos"),
-            (Fore.CYAN,   "3 - Mejorar calidad de archivos"),
-            (Fore.YELLOW, "4 - Ayuda"),
-            (Fore.RED,    "5 - Salir"),
+            "1 - Descargar contenido",
+            "2 - Convertir archivos",
+            "3 - Mejorar calidad de archivos",
+            "4 - Ayuda",
+            "5 - Salir",
         ]
-        
-        borde = "─" * (BOX_WIDTH - 2)
-        
-        print(Fore.MAGENTA + "╭" + borde + "╮")
-        for color, texto in opciones:
-            print(Fore.MAGENTA + "│ " + color + texto.ljust(BOX_WIDTH - 4) + Fore.MAGENTA + " │")
-        print(Fore.MAGENTA + "╰" + borde + "╯\n")
-        
+        colores = [Fore.GREEN, Fore.BLUE, Fore.CYAN, Fore.YELLOW, Fore.RED]
+
+        print_menu_box(opciones, colores)
+        print()
+
         mostrar_cursor()
         print(Fore.CYAN + "  -> Ingresa el número de la opción: ", end="")
     
@@ -117,19 +115,21 @@ class DataDownloader:
                     self.despedida()
                     break
                 
-                # Delegar al manejador de menús
-                if not self.menu_handler.manejar_opcion(opcion):
+                try:
+                    # Delegar al manejador de menús
+                    if not self.menu_handler.manejar_opcion(opcion):
+                        from src.utils.helpers import pausar
+                        print(Fore.RED + centrar_texto(MESSAGES["invalid_option"]) + Style.RESET_ALL)
+                        pausar(mostrar=False)
+                except Exception as e:
+                    # Los errores de una opción no deben cerrar la app
                     from src.utils.helpers import pausar
-                    print(Fore.RED + centrar_texto(MESSAGES["invalid_option"]) + Style.RESET_ALL)
+                    print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
                     pausar(mostrar=False)
         
         except KeyboardInterrupt:
             print("\n")
             self.despedida()
-        
-        except Exception as e:
-            print(Fore.RED + f"\n{MESSAGES['error_occurred']}: {e}")
-            mostrar_cursor()
         
         finally:
             mostrar_cursor()
