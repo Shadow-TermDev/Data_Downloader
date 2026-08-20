@@ -26,7 +26,7 @@ LICENSE = "MIT"
 STORAGE_BASE = Path("/storage/emulated/0")
 
 # Directorios de salida
-VIDEOS_DIR = STORAGE_BASE / "VMovies" / "Videos_Downloader"
+VIDEOS_DIR = STORAGE_BASE / "Movies" / "Videos_Downloader"
 AUDIO_DIR = STORAGE_BASE / "Music" / "Music_Downloader"
 IMAGES_DIR = STORAGE_BASE / "Pictures" / "Picture_Downloader"
 

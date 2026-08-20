@@ -87,6 +87,25 @@
 
 Una vez ejecutado el programa, puedes descargar audios y videos usando el enlace correspondiente. Sigue las instrucciones en pantalla para seleccionar el formato y la calidad deseada.
 
+### 📥 Directorios de salida
+
+Los archivos se guardan automáticamente en carpetas organizadas:
+
+| Tipo      | Directorio                                           |
+|-----------|------------------------------------------------------|
+| 🎬 Video  | `/storage/emulated/0/Movies/Videos_Downloader`       |
+| 🎵 Audio  | `/storage/emulated/0/Music/Music_Downloader`         |
+| 🖼️ Imagen | `/storage/emulated/0/Pictures/Picture_Downloader`    |
+
+> El convertidor y el mejorador guardan los archivos procesados junto al original con los sufijos `_convertido`, `_audio`, `_mejorado` o `_mejorada`.
+
+### ⚠️ Solución de problemas
+
+- **YouTube bloquea las descargas** ("Sign in to confirm"): instala el proveedor de PO Token con `pip install bgutil-ytdlp-pot-provider` o usa una VPN.
+- **TikTok / Facebook piden cookies** (error 403): exporta las cookies de tu navegador con `yt-dlp --cookies-from-browser chrome URL`.
+- **Mantén yt-dlp actualizado** para evitar fallos con cambios de plataformas: `pip install -U yt-dlp`.
+- **FFmpeg es necesario** para conversiones, mejoras e incrustar portadas: `pkg install ffmpeg`.
+
 ---
 
 ## 📄 Licencia

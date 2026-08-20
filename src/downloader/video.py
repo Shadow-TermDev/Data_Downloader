@@ -138,8 +138,6 @@ def obtener_calidades_video(url: str) -> list:
     """
     pot_iniciado = pot_token.iniciar_si_necesario()
 
-    url = resolver_facebook_url(url)
-
     es_tk = es_tiktok(url)
     es_fb = es_facebook(url)
 
@@ -211,7 +209,7 @@ def obtener_calidades_video(url: str) -> list:
             print(Fore.YELLOW + "\n⚠️  Facebook requiere cookies de sesión")
             print(Fore.CYAN + "   → Exporta cookies de Facebook desde navegador")
         else:
-            print(Fore.RED + f"\n❌ Error: {ultimo_error[:60]}")
+            print(Fore.RED + f"\n❌ {ultimo_error[:60]}")
 
 
 def seleccionar_calidad(calidades: list) -> str:
@@ -356,7 +354,6 @@ def descargar_video(url: str):
                                 f"💾 Tamaño: {tamanho}",
                                 f"📁 {VIDEOS_DIR.name}"
                             ])
-                            pausar()
                             return
                 except Exception:
                     continue

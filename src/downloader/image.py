@@ -78,7 +78,6 @@ def descargar_imagen(url: str):
             img = Image.open(data)
         except UnidentifiedImageError:
             print_error_box("❌ ERROR", ["El enlace no es una imagen válida"])
-            pausar()
             return
 
         ancho, alto = img.size
@@ -86,6 +85,26 @@ def descargar_imagen(url: str):
 
         nombre_limpio = generar_nombre_limpio(url, formato)
         ruta_final = IMAGES_DIR / nombre_limpio
+
+        # Corregir la extensión si no coincide con el formato real de la imagen
+        if formato != "Desconocido":
+            ext_real = formato.lower()
+            if ext_real == "jpeg":
+                ext_real = "jpg"
+            if ruta_final.suffix.lower() != f".{ext_real}":
+                ruta_final = ruta_final.with_suffix(f".{ext_real}")
+                nombre_limpio = ruta_final.name
+
+        # JPEG no soporta transparencia: pegar sobre fondo blanco
+        if ruta_final.suffix.lower() in (".jpg", ".jpeg") and img.mode in ("RGBA", "LA", "P"):
+            fondo = Image.new("RGB", img.size, (255, 255, 255))
+            if img.mode == "P":
+                img = img.convert("RGBA")
+            if img.mode in ("RGBA", "LA"):
+                fondo.paste(img, mask=img.split()[-1])
+            else:
+                fondo.paste(img)
+            img = fondo
 
         save_params = {}
         if formato == "PNG":

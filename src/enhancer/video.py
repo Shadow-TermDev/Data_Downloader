@@ -57,6 +57,8 @@ def mejorar_calidad_video(ruta_video: Path):
     """
     ocultar_cursor()
     
+    ruta_salida = None
+    
     try:
         if not ruta_video.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
@@ -132,7 +134,7 @@ def mejorar_calidad_video(ruta_video: Path):
     
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n\n⚠️  Proceso cancelado por el usuario")
-        if ruta_salida.exists():
+        if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:

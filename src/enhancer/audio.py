@@ -58,6 +58,8 @@ def mejorar_calidad_audio(ruta_audio: Path):
     """
     ocultar_cursor()
     
+    ruta_salida = None
+    
     try:
         if not ruta_audio.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_audio}")
@@ -111,8 +113,8 @@ def mejorar_calidad_audio(ruta_audio: Path):
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
 
             print_success_box("✅ AUDIO MEJORADO EXITOSAMENTE", [
-                f"🖼️  Portada preservada",
-                f"📝 Metadatos preservados",
+                "🖼️  Portada preservada",
+                "📝 Metadatos preservados",
                 f"📝 Nombre: {ruta_salida.name}",
                 f"🎵 Bitrate: {bitrate}",
                 f"💾 Tamaño original: {tamaño_original:.2f} MB",
@@ -132,7 +134,7 @@ def mejorar_calidad_audio(ruta_audio: Path):
     
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n\n⚠️  Proceso cancelado por el usuario")
-        if ruta_salida.exists():
+        if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:

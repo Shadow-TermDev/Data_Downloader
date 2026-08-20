@@ -25,6 +25,8 @@ def convertir_video(ruta_video: Path, formato: str):
     """
     ocultar_cursor()
     
+    ruta_salida = None
+    
     try:
         if not ruta_video.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
@@ -105,7 +107,7 @@ def convertir_video(ruta_video: Path, formato: str):
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n\n⚠️  Conversión cancelada por el usuario")
         # Limpiar archivo incompleto
-        if ruta_salida.exists():
+        if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:

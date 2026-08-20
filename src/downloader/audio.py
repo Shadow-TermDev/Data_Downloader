@@ -19,7 +19,8 @@ from src.utils.boxes import (
 
 
 def es_tiktok(url: str) -> bool:
-    return 'tiktok.com' in url.lower()
+    url_lower = url.lower()
+    return 'tiktok.com' in url_lower or 'vm.tiktok.com' in url_lower or 'musical.ly' in url_lower
 
 
 def es_youtube(url: str) -> bool:
@@ -190,7 +191,6 @@ def descargar_audio(url: str):
         ydl_opts['outtmpl'] = str(AUDIO_DIR / '%(title)s.%(ext)s')
         ydl_opts['format'] = formatear_audio(formato_id)
         ydl_opts['progress_hooks'] = [progreso_hook]
-        ydl_opts['writethumbnail'] = True
 
         # Postprocessors para MP3
         postprocessors = [{
@@ -200,6 +200,8 @@ def descargar_audio(url: str):
         }]
 
         if ffmpeg_ok:
+            # Solo descargar portada si se puede incrustar
+            ydl_opts['writethumbnail'] = True
             postprocessors.append({'key': 'EmbedThumbnail'})
         else:
             print(Fore.YELLOW + " ⚠️  ffmpeg no disponible - sin portada")

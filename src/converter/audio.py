@@ -25,6 +25,8 @@ def convertir_audio(ruta_audio: Path, formato: str):
     """
     ocultar_cursor()
     
+    ruta_salida = None
+    
     try:
         if not ruta_audio.exists():
             print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_audio}")
@@ -103,7 +105,7 @@ def convertir_audio(ruta_audio: Path, formato: str):
         process.wait()
         
         # Verificar resultado
-        if process.returncode == 0 and ruta_salida.exists() and ruta_salida.stat().st_size > 50000:
+        if process.returncode == 0 and ruta_salida.exists():
             tamaño_mb = ruta_salida.stat().st_size / (1024 * 1024)
 
             lineas = []
@@ -137,7 +139,7 @@ def convertir_audio(ruta_audio: Path, formato: str):
     
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n\n⚠️  Conversión cancelada por el usuario")
-        if ruta_salida.exists():
+        if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:
