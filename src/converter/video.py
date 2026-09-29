@@ -1,6 +1,6 @@
 """
-Módulo de conversión de videos
-Autor: Shadow-TermDev
+Video conversion module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -17,11 +17,11 @@ from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 def convertir_video(ruta_video: Path, formato: str):
     """
-    Convierte un video a otro formato
+    Convert a video to another format
     
     Args:
-        ruta_video: Path del video original
-        formato: Formato de salida (mp4, mkv, avi, mov, webm)
+        ruta_video: Original video Path
+        formato: Output format (mp4, mkv, avi, mov, webm)
     """
     ocultar_cursor()
     
@@ -29,19 +29,19 @@ def convertir_video(ruta_video: Path, formato: str):
     
     try:
         if not ruta_video.exists():
-            print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
+            print(Fore.RED + f"\n❌ File not found: {ruta_video}")
             return
         
         if formato.lower() not in VIDEO_FORMATS:
-            print(Fore.RED + f"\n❌ Formato no soportado: {formato}")
-            print(Fore.CYAN + f"Formatos disponibles: {', '.join(VIDEO_FORMATS)}")
+            print(Fore.RED + f"\n❌ Unsupported format: {formato}")
+            print(Fore.CYAN + f"Available formats: {', '.join(VIDEO_FORMATS)}")
             return
         
         # Generar nombre de salida
-        ruta_salida = generar_nombre_salida(ruta_video, "_convertido", formato)
+        ruta_salida = generar_nombre_salida(ruta_video, "_converted", formato)
         
-        print(Fore.YELLOW + f"\n🔄 Convirtiendo video a .{formato.upper()}...")
-        print(Fore.CYAN + "⏳ Esto puede tomar varios minutos...\n")
+        print(Fore.YELLOW + f"\n🔄 Converting video to .{formato.upper()}...")
+        print(Fore.CYAN + "⏳ This may take several minutes...\n")
         
         # Configurar codec según formato
         if formato in ["mp4", "mov"]:
@@ -87,31 +87,31 @@ def convertir_video(ruta_video: Path, formato: str):
         if process.returncode == 0 and ruta_salida.exists():
             tamaño_mb = ruta_salida.stat().st_size / (1024 * 1024)
 
-            print_success_box("✅ VIDEO CONVERTIDO EXITOSAMENTE", [
-                f"📝 Nombre: {ruta_salida.name}",
-                f"📦 Formato: {formato.upper()}",
-                f"💾 Tamaño: {tamaño_mb:.2f} MB",
+            print_success_box("✅ VIDEO CONVERTED SUCCESSFULLY", [
+                f"📝 Name: {ruta_salida.name}",
+                f"📦 Format: {formato.upper()}",
+                f"💾 Size: {tamaño_mb:.2f} MB",
                 f"📁 {ruta_salida.parent}",
             ])
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_video)
         else:
-            print(Fore.RED + "\n\n❌ Error durante la conversión")
-            print(Fore.YELLOW + "💡 Verifica que FFmpeg esté instalado correctamente")
+            print(Fore.RED + "\n\n❌ Error during conversion")
+            print(Fore.YELLOW + "💡 Check that FFmpeg is installed correctly")
     
     except FileNotFoundError:
-        print(Fore.RED + "\n❌ FFmpeg no está instalado")
-        print(Fore.CYAN + "Instálalo con: pkg install ffmpeg")
+        print(Fore.RED + "\n❌ FFmpeg is not installed")
+        print(Fore.CYAN + "Install it with: pkg install ffmpeg")
     
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Conversión cancelada por el usuario")
+        print(Fore.YELLOW + "\n\n⚠️  Conversion cancelled by user")
         # Limpiar archivo incompleto
         if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
+        print(Fore.RED + f"\n❌ Unexpected error: {str(e)}")
     
     finally:
         pausar()

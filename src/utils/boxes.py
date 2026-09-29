@@ -1,13 +1,13 @@
 """
-Cajas UI consistentes para todo el proyecto
-Autor: Shadow-TermDev
-Estándar visual:
-  - Usar SOLO líneas simples (─) coherente con menú principal
-  - Ancho estándar: 54 (BOX_WIDTH) · Info: 50 (INFO_WIDTH)
-  - Colores: GREEN=éxito, CYAN=info/progreso, RED=error, YELLOW=títulos
+Consistent UI boxes for the whole project
+Author: Shadow-TermDev
+Visual standard:
+  - Use ONLY single lines (─) consistent with the main menu
+  - Standard width: 54 (BOX_WIDTH) · Info: 50 (INFO_WIDTH)
+  - Colors: GREEN=success, CYAN=info/progress, RED=error, YELLOW=titles
 
-NUNCA imprimas bordes manualmente. Usa print_box() o las cajas con nombre.
-El ancho se calcula automáticamente según el contenido más largo.
+NEVER print borders manually. Use print_box() or the named boxes.
+Width is auto-calculated from the longest content.
 """
 
 import re
@@ -199,8 +199,8 @@ def print_progress_bar(percent: float, speed: str = "", eta: str = "", width: in
 
 
 def print_progress_done():
-    """Limpia y muestra completado"""
-    print(f"\r{Fore.GREEN}✓ Completado".ljust(50) + "\n")
+    """Clear and show completed"""
+    print(f"\r{Fore.GREEN}✓ Completed".ljust(50) + "\n")
 
 
 def clear_progress_line(width: int = 50):

@@ -1,67 +1,156 @@
 {
   "1": {
-    "titulo": "Descargar Contenido",
-    "mensaje": "El módulo de descarga te permite obtener videos, audios e imágenes desde diversas plataformas de internet con la mejor calidad disponible.",
+    "title": "Download Content",
+    "titulo": "Download Content",
+    "message": "The download module lets you fetch videos, audios and images from many internet platforms at the best available quality.",
+    "mensaje": "The download module lets you fetch videos, audios and images from many internet platforms at the best available quality.",
+    "steps": [
+      "Select 'Download content' in the main menu",
+      "Pick the content type: Video, Audio or Image",
+      "Paste the full URL of the content you want",
+      "Pick the quality from the available options",
+      "Wait for the download to finish",
+      "Find your file in the matching folder"
+    ],
     "pasos": [
-      "Selecciona 'Descargar contenido' en el menú principal",
-      "Elige el tipo de contenido: Video, Audio o Imagen",
-      "Pega la URL completa del contenido que deseas descargar",
-      "Selecciona la calidad deseada de las opciones disponibles",
-      "Espera a que la descarga se complete",
-      "Encuentra tu archivo en la carpeta correspondiente"
+      "Select 'Download content' in the main menu",
+      "Pick the content type: Video, Audio or Image",
+      "Paste the full URL of the content you want",
+      "Pick the quality from the available options",
+      "Wait for the download to finish",
+      "Find your file in the matching folder"
+    ],
+    "tips": [
+      "Videos: YouTube, TikTok, Instagram and more are supported",
+      "Audio: downloads as MP3 with cover and metadata included",
+      "Images: original quality is always preserved",
+      "Downloads are saved into auto-organized folders",
+      "If a download fails, check that the URL is correct and public",
+      "Keep yt-dlp updated: pip install -U yt-dlp"
     ],
     "consejos": [
-      "Para videos: YouTube, TikTok, Instagram y más plataformas son compatibles",
-      "Para audio: Se descarga en MP3 con portada y metadatos incluidos",
-      "Para imágenes: La calidad original siempre se preserva",
-      "Las descargas se guardan en carpetas organizadas automáticamente",
-      "Si una descarga falla, verifica que la URL sea correcta y pública",
-      "Actualiza yt-dlp regularmente: pip install -U yt-dlp"
+      "Videos: YouTube, TikTok, Instagram and more are supported",
+      "Audio: downloads as MP3 with cover and metadata included",
+      "Images: original quality is always preserved",
+      "Downloads are saved into auto-organized folders",
+      "If a download fails, check that the URL is correct and public",
+      "Keep yt-dlp updated: pip install -U yt-dlp"
     ]
   },
   "2": {
-    "titulo": "Convertir Archivos",
-    "mensaje": "El convertidor te permite transformar tus archivos multimedia a diferentes formatos manteniendo la mejor calidad posible y preservando metadatos.",
+    "title": "Convert Files",
+    "titulo": "Convert Files",
+    "message": "The converter lets you transcode your media files to different formats while keeping the best possible quality and preserving metadata.",
+    "mensaje": "The converter lets you transcode your media files to different formats while keeping the best possible quality and preserving metadata.",
+    "steps": [
+      "Select 'Convert files' in the main menu",
+      "Pick the conversion type you need",
+      "Enter the file name (no full path needed)",
+      "The system will search for the file on your device",
+      "Pick the desired output format",
+      "Wait for the conversion to finish",
+      "Choose whether to keep or delete the original file"
+    ],
     "pasos": [
-      "Selecciona 'Convertir archivos' en el menú principal",
-      "Elige el tipo de conversión que necesitas",
-      "Ingresa el nombre del archivo (no necesita ruta completa)",
-      "El sistema buscará el archivo en tu dispositivo",
-      "Selecciona el formato de salida deseado",
-      "Espera a que la conversión termine",
-      "Decide si quieres conservar o eliminar el archivo original"
+      "Select 'Convert files' in the main menu",
+      "Pick the conversion type you need",
+      "Enter the file name (no full path needed)",
+      "The system will search for the file on your device",
+      "Pick the desired output format",
+      "Wait for the conversion to finish",
+      "Choose whether to keep or delete the original file"
+    ],
+    "tips": [
+      "Videos: MP4, MKV, AVI, MOV, WebM available",
+      "Audio: MP3, WAV, AAC, FLAC, OGG, M4A with cover preserved",
+      "Images: PNG, JPG, WebP, BMP, GIF, TIFF, ICO supported",
+      "Video → Audio: extract audio keeping the video cover",
+      "Conversion preserves metadata when possible",
+      "Lossless formats like FLAC and PNG keep max quality",
+      "OGG and other advanced formats require cover conversion"
     ],
     "consejos": [
-      "Videos: MP4, MKV, AVI, MOV, WebM disponibles",
-      "Audio: MP3, WAV, AAC, FLAC, OGG, M4A con portada preservada",
-      "Imágenes: PNG, JPG, WebP, BMP, GIF, TIFF, ICO soportados",
-      "Video → Audio: Extrae audio manteniendo la portada del video",
-      "La conversión preserva metadatos cuando es posible",
-      "Formatos sin pérdida como FLAC y PNG mantienen máxima calidad",
-      "OGG y otros formatos avanzados requieren conversión de portada"
+      "Videos: MP4, MKV, AVI, MOV, WebM available",
+      "Audio: MP3, WAV, AAC, FLAC, OGG, M4A with cover preserved",
+      "Images: PNG, JPG, WebP, BMP, GIF, TIFF, ICO supported",
+      "Video → Audio: extract audio keeping the video cover",
+      "Conversion preserves metadata when possible",
+      "Lossless formats like FLAC and PNG keep max quality",
+      "OGG and other advanced formats require cover conversion"
     ]
   },
   "3": {
-    "titulo": "Mejorar Calidad",
-    "mensaje": "El módulo de mejora te permite aumentar la resolución y calidad de tus archivos mediante técnicas avanzadas de procesamiento.",
+    "title": "Enhance Quality",
+    "titulo": "Enhance Quality",
+    "message": "The enhancement module lets you boost resolution and quality of your files with advanced processing techniques.",
+    "mensaje": "The enhancement module lets you boost resolution and quality of your files with advanced processing techniques.",
+    "steps": [
+      "Select 'Enhance quality' in the main menu",
+      "Pick the file type: Video, Audio or Image",
+      "Enter the name of the file to enhance",
+      "Pick the desired enhancement level",
+      "The process may take a while depending on the file",
+      "Review the result and compare it with the original",
+      "Choose whether to keep or delete the original file"
+    ],
     "pasos": [
-      "Selecciona 'Mejorar calidad' en el menú principal",
-      "Elige el tipo de archivo: Video, Audio o Imagen",
-      "Ingresa el nombre del archivo a mejorar",
-      "Selecciona el nivel de mejora deseado",
-      "El proceso puede tomar tiempo dependiendo del archivo",
-      "Revisa el resultado y compáralo con el original",
-      "Decide si conservar o eliminar el archivo original"
+      "Select 'Enhance quality' in the main menu",
+      "Pick the file type: Video, Audio or Image",
+      "Enter the name of the file to enhance",
+      "Pick the desired enhancement level",
+      "The process may take a while depending on the file",
+      "Review the result and compare it with the original",
+      "Choose whether to keep or delete the original file"
+    ],
+    "tips": [
+      "Videos: upscaling up to 4K with high-quality Lanczos",
+      "Audio: bitrate boost up to 320kbps preserving cover",
+      "Images: up to ×2.0 scaling with sharpness/contrast filters",
+      "Enhancement is intensive, be patient",
+      "Higher quality = bigger file size",
+      "Recommended: 'Balanced' level for best results",
+      "Small videos (360p, 480p) benefit most from upscaling",
+      "Audio cannot improve beyond its original quality"
     ],
     "consejos": [
-      "Videos: Upscaling hasta 4K con algoritmo Lanczos de alta calidad",
-      "Audio: Aumento de bitrate hasta 320kbps preservando portada",
-      "Imágenes: Escalado hasta ×2.0 con filtros de nitidez y contraste",
-      "El proceso de mejora es intensivo, ten paciencia",
-      "Mayor calidad = mayor tamaño de archivo",
-      "Recomendado usar nivel 'Balanceado' para mejores resultados",
-      "Videos pequeños (360p, 480p) se benefician más del upscaling",
-      "El audio no puede mejorar más allá de su calidad original"
+      "Videos: upscaling up to 4K with high-quality Lanczos",
+      "Audio: bitrate boost up to 320kbps preserving cover",
+      "Images: up to ×2.0 scaling with sharpness/contrast filters",
+      "Enhancement is intensive, be patient",
+      "Higher quality = bigger file size",
+      "Recommended: 'Balanced' level for best results",
+      "Small videos (360p, 480p) benefit most from upscaling",
+      "Audio cannot improve beyond its original quality"
+    ]
+  },
+  "4": {
+    "title": "YouTube Search",
+    "titulo": "YouTube Search",
+    "message": "The search prototype lets you find YouTube videos without leaving the app, then download them as video or audio.",
+    "mensaje": "The search prototype lets you find YouTube videos without leaving the app, then download them as video or audio.",
+    "steps": [
+      "Select 'Search YouTube' in the main menu",
+      "Type your search query and press Enter",
+      "Pick a result from the list (0 cancels)",
+      "Choose video or audio download",
+      "Pick the quality and wait for it to finish"
+    ],
+    "pasos": [
+      "Select 'Search YouTube' in the main menu",
+      "Type your search query and press Enter",
+      "Pick a result from the list (0 cancels)",
+      "Choose video or audio download",
+      "Pick the quality and wait for it to finish"
+    ],
+    "tips": [
+      "Prototype: shows the top 8 results via yt-dlp ytsearch",
+      "Use specific queries for better matches",
+      "0 / q / cancel goes back without downloading"
+    ],
+    "consejos": [
+      "Prototype: shows the top 8 results via yt-dlp ytsearch",
+      "Use specific queries for better matches",
+      "0 / q / cancel goes back without downloading"
     ]
   }
 }

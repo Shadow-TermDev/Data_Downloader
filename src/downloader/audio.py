@@ -1,6 +1,6 @@
 """
-Módulo de descarga de audio
-Autor: Shadow-TermDev
+Audio download module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -28,7 +28,7 @@ def es_youtube(url: str) -> bool:
 
 
 def obtener_opts_base() -> dict:
-    """Retorna opciones base para yt-dlp"""
+    """Return base yt-dlp options"""
     return {
         'quiet': True,
         'no_warnings': True,
@@ -40,8 +40,8 @@ def obtener_opts_base() -> dict:
 
 def obtener_calidades_audio(url: str) -> Optional[Tuple[List, dict]]:
     """
-    Obtiene las calidades de audio disponibles
-    Retorna: (lista_formatos, ydl_opts) o None si falla
+    Get available audio qualities
+    Returns: (format_list, ydl_opts) or None on failure
     """
     pot_iniciado = pot_token.iniciar_si_necesario()
     pot_opts = pot_token.obtener_opts_audio() if pot_iniciado else {}
@@ -101,7 +101,7 @@ def obtener_calidades_audio(url: str) -> Optional[Tuple[List, dict]]:
 
 
 def seleccionar_calidad(calidades: list) -> str:
-    """Permite seleccionar la calidad de audio"""
+    """Let the user pick la calidad de audio"""
     lines = []
     colors = []
     for i, (fid, label, size) in enumerate(calidades[:6]):
@@ -112,21 +112,21 @@ def seleccionar_calidad(calidades: list) -> str:
             colors.append(Fore.WHITE)
             lines.append(f"  {i+1}. {label:<12} {size}")
 
-    print_selection_box("🎵 CALIDADES DE AUDIO", lines, colors)
+    print_selection_box("🎵 AUDIO QUALITIES", lines, colors)
 
     while True:
         mostrar_cursor()
-        sel = input(Fore.CYAN + "\n➜ Elige calidad [1-6]: " + Style.RESET_ALL).strip()
+        sel = input(Fore.CYAN + "\n➜ Pick quality [1-6]: " + Style.RESET_ALL).strip()
         ocultar_cursor()
 
         if sel.isdigit() and 1 <= int(sel) <= min(len(calidades), 6):
             return calidades[int(sel) - 1][0]
 
-        print(Fore.RED + "❌ Opción inválida")
+        print(Fore.RED + "❌ Invalid option")
 
 
 def progreso_hook(d):
-    """Hook para mostrar progreso de descarga"""
+    """Hook to show download progress"""
     if d['status'] == 'downloading':
         try:
             percent = d.get('_percent_str', '0%').strip()
@@ -142,14 +142,14 @@ def progreso_hook(d):
 
 
 def formatear_audio(formato_id: str) -> str:
-    """Genera el formato de descarga con fallback progresivo"""
+    """Build the download format with progressive fallback"""
     if formato_id == "bestaudio":
         return "bestaudio/best"
     return f"{formato_id}+bestaudio/{formato_id}/bestaudio/best"
 
 
 def verificar_ffmpeg() -> bool:
-    """Verifica si ffmpeg está disponible"""
+    """Check if ffmpeg is available"""
     import subprocess
     try:
         result = subprocess.run(
@@ -163,27 +163,27 @@ def verificar_ffmpeg() -> bool:
 
 
 def descargar_audio(url: str):
-    """Descarga audio de una URL y convierte a MP3"""
+    """Download audio from a URL and convert to MP3"""
     ocultar_cursor()
 
     ffmpeg_ok = verificar_ffmpeg()
 
     try:
         # Caja de análisis
-        print_info_box("🎵 ANALIZANDO AUDIO")
+        print_info_box("🎵 ANALYZING AUDIO")
 
         resultado = obtener_calidades_audio(url)
 
         calidades, opts_usados = resultado
 
         if not calidades:
-            print_error_box("❌ SIN CALIDADES", ["No se pudieron obtener las calidades de audio"])
+            print_error_box("❌ NO QUALITIES", ["Could not fetch qualities de audio"])
             return
 
         formato_id = seleccionar_calidad(calidades)
 
-        print_success_box("📥 DESCARGANDO AUDIO", [
-            "Por favor espera... el audio se está descargando"
+        print_success_box("📥 DOWNLOADING AUDIO", [
+            "Please wait... audio is downloading"
         ])
 
         # Usar los mismos opts que se usaron para obtener las calidades
@@ -214,12 +214,12 @@ def descargar_audio(url: str):
         ydl_opts['postprocessors'] = postprocessors
 
         if pot_token.iniciar_si_necesario():
-            print(Fore.CYAN + " ✓ PO Token activo")
+            print(Fore.CYAN + " ✓ PO Token active")
 
         if es_tiktok(url):
             ydl_opts.setdefault('extractor_args', {})
             ydl_opts['extractor_args']['tiktok'] = {'downloadaddr': True}
-            print(Fore.YELLOW + " ⚠️  TikTok detectado")
+            print(Fore.YELLOW + " ⚠️  TikTok detected")
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -229,18 +229,18 @@ def descargar_audio(url: str):
             seg_dur = duracion % 60
 
         print()
-        print_success_box("✅ DESCARGA COMPLETADA", [
-            f"📝 Título: {titulo}",
-            f"⏱️  Duración: {min_dur}:{seg_dur:02d}",
+        print_success_box("✅ DOWNLOAD COMPLETED", [
+            f"📝 Title: {titulo}",
+            f"⏱️  Duration: {min_dur}:{seg_dur:02d}",
             "📁 Music/Music_Downloader"
         ])
 
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
+        print(Fore.YELLOW + "\n⚠️  Download cancelled")
     except Exception as e:
         error_str = str(e)
         if "Requested format" in error_str:
-            print_error_box("❌ ERROR", ["Formato no disponible, intenta con otra calidad"])
+            print_error_box("❌ ERROR", ["Format unavailable, try another quality"])
         else:
             print_error_box("❌ ERROR", [f"Error: {error_str[:50]}"])
     finally:

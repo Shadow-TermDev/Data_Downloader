@@ -1,6 +1,6 @@
 """
-Módulo de mejora de calidad de audio
-Autor: Shadow-TermDev
+Audio quality enhancement module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -16,15 +16,15 @@ from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 def seleccionar_calidad() -> str:
     """
-    Permite seleccionar el bitrate de salida
+    Let the user pick el bitrate de salida
     
     Returns:
-        String de bitrate (ej: "320k")
+        Bitrate string (e.g.: "320k")
     """
     opciones = [
-        ("1", "128k", "128 kbps", "Calidad estándar"),
-        ("2", "256k", "256 kbps", "Alta calidad - Recomendado"),
-        ("3", "320k", "320 kbps", "Calidad máxima")
+        ("1", "128k", "128 kbps", "Standard quality"),
+        ("2", "256k", "256 kbps", "High quality - Recommended"),
+        ("3", "320k", "320 kbps", "Max quality")
     ]
 
     lineas = []
@@ -34,27 +34,27 @@ def seleccionar_calidad() -> str:
         lineas.append(f"{estrella}{num}. {label} - {desc}")
         colores.append(Fore.GREEN if num == "2" else Fore.WHITE)
 
-    print_selection_box("🎵 CALIDAD DE AUDIO", lineas, colores)
+    print_selection_box("🎵 AUDIO QUALITY", lineas, colores)
     
     while True:
         mostrar_cursor()
-        choice = input(Fore.CYAN + "\n➜ Elige [1-3] (2=recomendado): " + Style.RESET_ALL).strip()
+        choice = input(Fore.CYAN + "\n➜ Pick [1-3] (2=recommended): " + Style.RESET_ALL).strip()
         ocultar_cursor()
         
         opciones_dict = {"1": "128k", "2": "256k", "3": "320k"}
         if choice in opciones_dict:
             return opciones_dict[choice]
         
-        print(Fore.RED + "❌ Opción inválida")
+        print(Fore.RED + "❌ Invalid option")
 
 
 def mejorar_calidad_audio(ruta_audio: Path):
     """
-    Mejora la calidad de un audio aumentando el bitrate
-    Preserva portada y metadatos
+    Enhance audio quality by raising bitrate
+    Preserve cover and metadata
     
     Args:
-        ruta_audio: Path del audio original
+        ruta_audio: Original audio Path
     """
     ocultar_cursor()
     
@@ -62,17 +62,17 @@ def mejorar_calidad_audio(ruta_audio: Path):
     
     try:
         if not ruta_audio.exists():
-            print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_audio}")
+            print(Fore.RED + f"\n❌ File not found: {ruta_audio}")
             return
         
         # Seleccionar bitrate
         bitrate = seleccionar_calidad()
         
         # Generar nombre de salida (siempre MP3)
-        ruta_salida = generar_nombre_salida(ruta_audio, "_mejorado", "mp3")
+        ruta_salida = generar_nombre_salida(ruta_audio, "_enhanced", "mp3")
         
-        print(Fore.YELLOW + f"\n⬆️  Mejorando audio a {bitrate}...")
-        print(Fore.CYAN + "⏳ Preservando portada y metadatos...\n")
+        print(Fore.YELLOW + f"\n⬆️  Enhancing audio to {bitrate}...")
+        print(Fore.CYAN + "⏳ Preserving cover and metadata...\n")
         
         # Comando FFmpeg: convierte a MP3 y conserva portada y metadatos
         comando = [
@@ -112,33 +112,33 @@ def mejorar_calidad_audio(ruta_audio: Path):
             tamaño_original = ruta_audio.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
 
-            print_success_box("✅ AUDIO MEJORADO EXITOSAMENTE", [
-                "🖼️  Portada preservada",
-                "📝 Metadatos preservados",
-                f"📝 Nombre: {ruta_salida.name}",
+            print_success_box("✅ AUDIO ENHANCED SUCCESSFULLY", [
+                "🖼️  Cover preserved",
+                "📝 Metadata preserved",
+                f"📝 Name: {ruta_salida.name}",
                 f"🎵 Bitrate: {bitrate}",
-                f"💾 Tamaño original: {tamaño_original:.2f} MB",
-                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+                f"💾 Original size: {tamaño_original:.2f} MB",
+                f"💾 Final size: {tamaño_nuevo:.2f} MB",
                 f"📁 {ruta_salida.parent}",
             ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN])
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_audio)
         else:
-            print(Fore.RED + "\n\n❌ Error al procesar el audio")
-            print(Fore.YELLOW + "💡 Verifica que FFmpeg esté instalado correctamente")
+            print(Fore.RED + "\n\n❌ Error processing audio")
+            print(Fore.YELLOW + "💡 Check that FFmpeg is installed correctly")
     
     except FileNotFoundError:
-        print(Fore.RED + "\n❌ FFmpeg no está instalado")
-        print(Fore.CYAN + "Instálalo con: pkg install ffmpeg")
+        print(Fore.RED + "\n❌ FFmpeg is not installed")
+        print(Fore.CYAN + "Install it with: pkg install ffmpeg")
     
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Proceso cancelado por el usuario")
+        print(Fore.YELLOW + "\n\n⚠️  Process cancelled by user")
         if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
+        print(Fore.RED + f"\n❌ Unexpected error: {str(e)}")
     
     finally:
         pausar()

@@ -1,6 +1,6 @@
 """
-Módulo de mejora de calidad de imágenes
-Autor: Shadow-TermDev
+Image quality enhancement module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -16,15 +16,15 @@ from src.core.file_manager import generar_nombre_salida, eliminar_archivo_seguro
 
 def seleccionar_calidad() -> tuple:
     """
-    Permite seleccionar el nivel de mejora
+    Let the user pick el nivel de mejora
     
     Returns:
-        Tupla con (escala, contraste, nitidez)
+        Tuple with (escala, contraste, nitidez)
     """
     opciones = [
-        ("1", (1.2, 1.1, 1.2), "×1.2 - Rápido", "Mejora ligera"),
-        ("2", (1.5, 1.3, 1.5), "×1.5 - Balanceado", "Recomendado"),
-        ("3", (2.0, 1.6, 2.0), "×2.0 - Máxima calidad", "Tarda más")
+        ("1", (1.2, 1.1, 1.2), "×1.2 - Fast", "Light enhancement"),
+        ("2", (1.5, 1.3, 1.5), "×1.5 - Balanced", "Recommended"),
+        ("3", (2.0, 1.6, 2.0), "×2.0 - Max quality", "Takes longer")
     ]
 
     lineas = []
@@ -34,11 +34,11 @@ def seleccionar_calidad() -> tuple:
         lineas.append(f"{estrella}{num}. {label} - {desc}")
         colores.append(Fore.GREEN if num == "2" else Fore.WHITE)
 
-    print_selection_box("🖼️  NIVEL DE MEJORA", lineas, colores)
+    print_selection_box("🖼️  ENHANCEMENT LEVEL", lineas, colores)
     
     while True:
         mostrar_cursor()
-        choice = input(Fore.CYAN + "\n➜ Elige [1-3] (2=recomendado): " + Style.RESET_ALL).strip()
+        choice = input(Fore.CYAN + "\n➜ Pick [1-3] (2=recommended): " + Style.RESET_ALL).strip()
         ocultar_cursor()
         
         opciones_dict = {
@@ -50,21 +50,21 @@ def seleccionar_calidad() -> tuple:
         if choice in opciones_dict:
             return opciones_dict[choice]
         
-        print(Fore.RED + "❌ Opción inválida")
+        print(Fore.RED + "❌ Invalid option")
 
 
 def mejorar_imagen(ruta_entrada: Path, escala: float, contraste: float, nitidez: float) -> tuple:
     """
-    Mejora una imagen con upscaling y filtros
+    Enhance an image with upscaling and filters
     
     Args:
-        ruta_entrada: Path de la imagen
+        ruta_entrada: Image Path
         escala: Factor de escala
         contraste: Factor de contraste
         nitidez: Factor de nitidez
         
     Returns:
-        Tupla con (imagen_mejorada, exif_data)
+        Tuple with (imagen_enhanced, exif_data)
     """
     try:
         with Image.open(ruta_entrada) as img:
@@ -75,15 +75,15 @@ def mejorar_imagen(ruta_entrada: Path, escala: float, contraste: float, nitidez:
             nuevo_ancho = int(img.width * escala)
             nuevo_alto = int(img.height * escala)
             
-            print(Fore.CYAN + f"   📐 Resolución original: {img.width}×{img.height} px")
-            print(Fore.CYAN + f"   📐 Resolución nueva: {nuevo_ancho}×{nuevo_alto} px")
+            print(Fore.CYAN + f"   📐 Original resolution: {img.width}×{img.height} px")
+            print(Fore.CYAN + f"   📐 New resolution: {nuevo_ancho}×{nuevo_alto} px")
             
             # Redimensionar con Lanczos (mejor calidad)
-            print(Fore.YELLOW + "   🔄 Aplicando upscaling Lanczos...")
+            print(Fore.YELLOW + "   🔄 Applying Lanczos upscaling...")
             img = img.resize((nuevo_ancho, nuevo_alto), Image.LANCZOS)
             
             # Aplicar filtros de mejora
-            print(Fore.YELLOW + "   ✨ Aplicando filtros de mejora...")
+            print(Fore.YELLOW + "   ✨ Applying enhancement filters...")
             
             # Filtro de detalles
             img = img.filter(ImageFilter.DETAIL)
@@ -104,34 +104,34 @@ def mejorar_imagen(ruta_entrada: Path, escala: float, contraste: float, nitidez:
 
 def mejorar_calidad_imagen(ruta_imagen: Path):
     """
-    Mejora la calidad de una imagen mediante upscaling y filtros
+    Enhance image quality via upscaling and filters
     
     Args:
-        ruta_imagen: Path de la imagen original
+        ruta_imagen: Original image Path
     """
     ocultar_cursor()
     
     try:
         if not ruta_imagen.exists():
-            print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_imagen}")
+            print(Fore.RED + f"\n❌ File not found: {ruta_imagen}")
             return
         
-        print(Fore.CYAN + f"\n📸 Procesando: {ruta_imagen.name}")
+        print(Fore.CYAN + f"\n📸 Processing: {ruta_imagen.name}")
         
         escala, contraste, nitidez = seleccionar_calidad()
         
-        ruta_salida = generar_nombre_salida(ruta_imagen, "_mejorada")
+        ruta_salida = generar_nombre_salida(ruta_imagen, "_enhanced")
         
-        print(Fore.YELLOW + f"\n⬆️  Mejorando imagen ×{escala}...")
-        print(Fore.CYAN + "⏳ Aplicando nitidez, contraste y upscaling...\n")
+        print(Fore.YELLOW + f"\n⬆️  Enhancing image ×{escala}...")
+        print(Fore.CYAN + "⏳ Applying sharpness, contrast and upscaling...\n")
         
-        img_mejorada, exif = mejorar_imagen(ruta_imagen, escala, contraste, nitidez)
+        img_enhanced, exif = mejorar_imagen(ruta_imagen, escala, contraste, nitidez)
         
-        if img_mejorada is None:
+        if img_enhanced is None:
             return
         
         # Guardar con máxima calidad
-        print(Fore.YELLOW + "\n💾 Guardando imagen mejorada...")
+        print(Fore.YELLOW + "\n💾 Saving image enhanced...")
         save_params = {
             "quality": 95,
             "optimize": True,
@@ -141,33 +141,33 @@ def mejorar_calidad_imagen(ruta_imagen: Path):
         # Preservar EXIF si existe
         if exif:
             save_params["exif"] = exif
-            print(Fore.GREEN + "   📝 Metadatos EXIF preservados")
+            print(Fore.GREEN + "   📝 EXIF metadata preserved")
         
-        img_mejorada.save(ruta_salida, **save_params)
+        img_enhanced.save(ruta_salida, **save_params)
         
         # Información del resultado
         if ruta_salida.exists():
             tamaño_original = ruta_imagen.stat().st_size / (1024 * 1024)
             tamaño_nuevo = ruta_salida.stat().st_size / (1024 * 1024)
 
-            print_success_box("✅ IMAGEN MEJORADA EXITOSAMENTE", [
-                f"📝 Nombre: {ruta_salida.name}",
-                f"📐 Resolución: {img_mejorada.width}×{img_mejorada.height} px",
-                f"⬆️  Factor de escala: ×{escala}",
-                f"💾 Tamaño original: {tamaño_original:.2f} MB",
-                f"💾 Tamaño final: {tamaño_nuevo:.2f} MB",
+            print_success_box("✅ IMAGE ENHANCED SUCCESSFULLY", [
+                f"📝 Name: {ruta_salida.name}",
+                f"📐 Resolution: {img_enhanced.width}×{img_enhanced.height} px",
+                f"⬆️  Scale factor: ×{escala}",
+                f"💾 Original size: {tamaño_original:.2f} MB",
+                f"💾 Final size: {tamaño_nuevo:.2f} MB",
                 f"📁 {ruta_salida.parent}",
             ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN])
 
-            print(Fore.CYAN + "\n💡 Se aplicaron filtros de nitidez, contraste y upscaling Lanczos")
+            print(Fore.CYAN + "\n💡 Sharpness, contrast and Lanczos upscaling filters applied")
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_imagen)
         else:
-            print(Fore.RED + "\n❌ Error al guardar la imagen")
+            print(Fore.RED + "\n❌ Error saving image")
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
+        print(Fore.RED + f"\n❌ Unexpected error: {str(e)}")
     
     finally:
         pausar()

@@ -1,69 +1,71 @@
 #!/usr/bin/env python3
 """
-Data Downloader - Herramienta multimedia para Termux
-Autor: Shadow-TermDev
+Data Downloader - Multimedia toolkit for Termux
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Versión: 1.6.0
+Version: 1.7.0
 """
 
 import sys
 from pathlib import Path
 
-# Agregar el directorio raíz al path para imports
+# Add repo root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from colorama import init, Fore, Style
 import pyfiglet
 
-# Importar configuración
+# Config
 from config.settings import (
     PROJECT_NAME, VERSION, AUTHOR, AUTHOR_TITLE,
     WEBSITE, REPOSITORY, MESSAGES
 )
 
-# Importar utilidades
+# Utils (TokenHub/player-style UI)
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import limpiar_pantalla, centrar_texto
 from src.utils.boxes import print_box, print_menu_box
+from src.utils.ui import print_header
 
-# Importar módulos principales
+# Core modules
 from src.core.menu import MenuHandler
 
-# Inicializar colorama
+# Init colorama
 init(autoreset=True)
 
 
 class DataDownloader:
-    """Clase principal de la aplicación"""
-    
+    """Main app class"""
+
     def __init__(self):
         self.menu_handler = MenuHandler()
-        
-    def mostrar_banner(self):
-        """Muestra el banner principal de la aplicación"""
+
+    def show_banner(self):
+        """Show the main app banner (player-style header + pyfiglet)"""
         limpiar_pantalla()
-        
-        # Título grande con pyfiglet
+        print_header(PROJECT_NAME, VERSION)
+
+        # Big title with pyfiglet
         titulo = pyfiglet.figlet_format("Downloader", font="slant")
         for linea in titulo.splitlines():
             print(Fore.YELLOW + centrar_texto(linea))
-        
+
         print(Fore.CYAN + centrar_texto("MUSIC, VIDEO & IMAGE DOWNLOADER\n"))
-    
-    def mostrar_info_proyecto(self):
-        """Muestra información del proyecto en un cuadro"""
+
+    def show_project_info(self):
+        """Show project info in a box"""
         lineas = [
             "",
-            "Creador:",
+            "Creator:",
             f"   {AUTHOR}  ·  {AUTHOR_TITLE}",
             "",
-            "Sitio Web:",
+            "Website:",
             f"   {WEBSITE}",
             "",
-            "Repositorio:",
+            "Repository:",
             f"   {REPOSITORY}",
             "",
-            "Versión:",
+            "Version:",
             f"   {VERSION}",
         ]
         colores = [Fore.MAGENTA, Fore.CYAN, Fore.WHITE, Fore.MAGENTA,
@@ -73,72 +75,80 @@ class DataDownloader:
         print_box(titulo=f" {PROJECT_NAME} ", lineas=lineas, borde=Fore.MAGENTA,
                   color_titulo=Fore.YELLOW, colores=colores)
 
-    def mostrar_menu_principal(self):
-        """Muestra el menú principal con opciones"""
+    def show_main_menu(self):
+        """Show the main menu options"""
         opciones = [
-            "1 - Descargar contenido",
-            "2 - Convertir archivos",
-            "3 - Mejorar calidad de archivos",
-            "4 - Ayuda",
-            "5 - Salir",
+            "1 - Download content",
+            "2 - Convert files",
+            "3 - Enhance file quality",
+            "4 - Search YouTube",
+            "5 - Help",
+            "6 - Exit",
         ]
-        colores = [Fore.GREEN, Fore.BLUE, Fore.CYAN, Fore.YELLOW, Fore.RED]
+        colores = [Fore.GREEN, Fore.BLUE, Fore.CYAN, Fore.MAGENTA, Fore.YELLOW, Fore.RED]
 
         print_menu_box(opciones, colores)
         print()
 
         mostrar_cursor()
-        print(Fore.CYAN + "  -> Ingresa el número de la opción: ", end="")
-    
-    def despedida(self):
-        """Muestra mensaje de despedida"""
+        print(Fore.CYAN + "  -> Enter option number: ", end="")
+
+    def farewell(self):
+        """Show goodbye message"""
         print()
         print(Fore.RED + centrar_texto(MESSAGES["goodbye"]))
         print(Fore.CYAN + centrar_texto(f"{VERSION} - {AUTHOR}"))
         print(Fore.MAGENTA + centrar_texto(f"🌐 {WEBSITE}"))
         mostrar_cursor()
-    
-    def ejecutar(self):
-        """Bucle principal de la aplicación"""
+
+    def run(self):
+        """Main app loop"""
         ocultar_cursor()
-        
+
         try:
             while True:
-                self.mostrar_banner()
-                self.mostrar_info_proyecto()
-                self.mostrar_menu_principal()
-                
+                self.show_banner()
+                self.show_project_info()
+                self.show_main_menu()
+
                 opcion = input().strip()
                 ocultar_cursor()
-                
-                if opcion == "5":
-                    self.despedida()
+
+                if opcion == "6":
+                    self.farewell()
                     break
-                
+
                 try:
-                    # Delegar al manejador de menús
-                    if not self.menu_handler.manejar_opcion(opcion):
+                    # Delegate to the menu handler
+                    if not self.menu_handler.handle_option(opcion):
                         from src.utils.helpers import pausar
                         print(Fore.RED + centrar_texto(MESSAGES["invalid_option"]) + Style.RESET_ALL)
                         pausar(mostrar=False)
                 except Exception as e:
-                    # Los errores de una opción no deben cerrar la app
+                    # Errors in one option must not kill the app
                     from src.utils.helpers import pausar
                     print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
                     pausar(mostrar=False)
-        
+
         except KeyboardInterrupt:
             print("\n")
-            self.despedida()
-        
+            self.farewell()
+
         finally:
             mostrar_cursor()
 
+    # --- Backward-compat aliases (old Spanish API) ---
+    mostrar_banner = show_banner
+    mostrar_info_proyecto = show_project_info
+    mostrar_menu_principal = show_main_menu
+    despedida = farewell
+    ejecutar = run
+
 
 def main():
-    """Punto de entrada de la aplicación"""
+    """App entry point"""
     app = DataDownloader()
-    app.ejecutar()
+    app.run()
 
 
 if __name__ == "__main__":

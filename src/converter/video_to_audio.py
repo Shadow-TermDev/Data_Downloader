@@ -1,6 +1,6 @@
 """
-Módulo de conversión de video a audio
-Autor: Shadow-TermDev
+Video-to-audio conversion module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -17,12 +17,12 @@ from src.core.file_manager import eliminar_archivo_seguro
 
 def convertir_video_a_audio(ruta_video: Path, formato: str):
     """
-    Extrae audio de un video y lo convierte al formato deseado
-    Preserva la portada del video como portada del audio
+    Extract audio from a video y lo convierte al formato deseado
+    Preserve the video cover as audio cover
     
     Args:
-        ruta_video: Path del video original
-        formato: Formato de audio de salida
+        ruta_video: Original video Path
+        formato: Output audio format
     """
     ocultar_cursor()
     
@@ -30,13 +30,13 @@ def convertir_video_a_audio(ruta_video: Path, formato: str):
     
     try:
         if not ruta_video.exists():
-            print(Fore.RED + f"\n❌ Archivo no encontrado: {ruta_video}")
+            print(Fore.RED + f"\n❌ File not found: {ruta_video}")
             return
         
         formato = formato.lower()
         if formato not in AUDIO_FORMATS:
-            print(Fore.RED + f"\n❌ Formato no soportado: {formato}")
-            print(Fore.CYAN + f"Formatos disponibles: {', '.join(AUDIO_FORMATS)}")
+            print(Fore.RED + f"\n❌ Unsupported format: {formato}")
+            print(Fore.CYAN + f"Available formats: {', '.join(AUDIO_FORMATS)}")
             return
         
         # Generar nombre de salida
@@ -47,8 +47,8 @@ def convertir_video_a_audio(ruta_video: Path, formato: str):
         # Título para mostrar
         titulo = "AAC → .M4A" if formato == "aac" else formato.upper()
         
-        print(Fore.YELLOW + f"\n🎵 Extrayendo audio del video → {titulo}")
-        print(Fore.CYAN + "⏳ Copiando portada y metadatos del video...\n")
+        print(Fore.YELLOW + f"\n🎵 Extracting audio from video → {titulo}")
+        print(Fore.CYAN + "⏳ Copying cover and metadata from video...\n")
         
         # Construir comando
         comando = ["ffmpeg", "-i", str(ruta_video)]
@@ -112,41 +112,41 @@ def convertir_video_a_audio(ruta_video: Path, formato: str):
             lineas = []
             colores = []
             if formato in FORMATS_WITH_COVER:
-                lineas.append("🖼️  Portada del video COPIADA correctamente")
+                lineas.append("🖼️  Video cover COPIED successfully")
                 colores.append(Fore.GREEN)
             elif formato == "wav":
-                lineas.append("⚠️  WAV no soporta portadas")
+                lineas.append("⚠️  WAV does not support covers")
                 colores.append(Fore.YELLOW)
 
             lineas += [
-                f"📝 Nombre: {ruta_salida.name}",
-                f"📦 Formato: {titulo}",
-                f"💾 Tamaño: {tamaño_mb:.2f} MB",
+                f"📝 Name: {ruta_salida.name}",
+                f"📦 Format: {titulo}",
+                f"💾 Size: {tamaño_mb:.2f} MB",
                 f"📁 {ruta_salida.parent}",
             ]
             colores += [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.CYAN]
 
-            print_success_box("✅ AUDIO EXTRAÍDO EXITOSAMENTE", lineas, colores)
+            print_success_box("✅ AUDIO EXTRACTED SUCCESSFULLY", lineas, colores)
 
-            print(Fore.CYAN + "\n💡 El audio fue extraído con máxima calidad del video")
+            print(Fore.CYAN + "\n💡 Audio extracted at max quality from the video")
             
             # Preguntar si eliminar original
             eliminar_archivo_seguro(ruta_video)
         else:
-            print(Fore.RED + "\n\n❌ Error durante la extracción")
-            print(Fore.YELLOW + "💡 Verifica que el video tenga pista de audio")
+            print(Fore.RED + "\n\n❌ Error during extraction")
+            print(Fore.YELLOW + "💡 Check that the video has an audio track")
     
     except FileNotFoundError:
-        print(Fore.RED + "\n❌ FFmpeg no está instalado")
-        print(Fore.CYAN + "Instálalo con: pkg install ffmpeg")
+        print(Fore.RED + "\n❌ FFmpeg is not installed")
+        print(Fore.CYAN + "Install it with: pkg install ffmpeg")
     
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Conversión cancelada por el usuario")
+        print(Fore.YELLOW + "\n\n⚠️  Conversion cancelled by user")
         if ruta_salida and ruta_salida.exists():
             ruta_salida.unlink()
     
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error inesperado: {str(e)}")
+        print(Fore.RED + f"\n❌ Unexpected error: {str(e)}")
     
     finally:
         pausar()

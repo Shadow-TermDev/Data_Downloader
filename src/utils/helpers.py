@@ -1,12 +1,13 @@
 """
-Utilidades y funciones auxiliares
-Autor: Shadow-TermDev
+Helpers and utility functions
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
 import os
 import shutil
 import json
+import sys
 from pathlib import Path
 from colorama import Fore, Style
 
@@ -15,19 +16,24 @@ from src.utils.animations import mostrar_cursor, ocultar_cursor
 
 
 def limpiar_pantalla():
-    """Limpia la pantalla de la terminal"""
+    """Clear the terminal screen (scrollback-safe, TokenHub-style)"""
+    try:
+        sys.stdout.write("\033[2J\033[3J\033[H")
+        sys.stdout.flush()
+    except Exception:
+        pass
     os.system("cls" if os.name == "nt" else "clear")
 
 
 def centrar_texto(texto: str) -> str:
     """
-    Centra un texto en la terminal
+    Center text in the terminal
     
     Args:
-        texto: Texto a centrar
+        texto: Text to center
         
     Returns:
-        Texto centrado con espacios
+        Centered text with padding
     """
     try:
         ancho = shutil.get_terminal_size().columns
@@ -39,28 +45,28 @@ def centrar_texto(texto: str) -> str:
 
 def pausar(mensaje: str = None, mostrar: bool = True):
     """
-    Pausa la ejecución hasta que el usuario presione Enter
+    Pause execution until the user presses Enter
     
     Args:
-        mensaje: Mensaje personalizado (opcional)
-        mostrar: Si True muestra el cursor antes de pausar
+        mensaje: Custom message (optional)
+        mostrar: If True, show cursor before pausing
     """
     if mostrar:
         mostrar_cursor()
     
-    msg = mensaje or "\n🔹 Presiona Enter para continuar..."
+    msg = mensaje or "\n🔹 Press Enter to continue..."
     input(Fore.CYAN + msg + Style.RESET_ALL)
     ocultar_cursor()
 
 
-def mostrar_progreso(actual: int, total: int, prefijo: str = "Progreso"):
+def mostrar_progreso(actual: int, total: int, prefijo: str = "Progress"):
     """
-    Muestra una barra de progreso
+    Show a progress bar
     
     Args:
-        actual: Valor actual
-        total: Valor total
-        prefijo: Texto antes de la barra
+        actual: Current value
+        total: Total value
+        prefijo: Text before the bar
     """
     if total <= 0:
         return
@@ -75,13 +81,13 @@ def mostrar_progreso(actual: int, total: int, prefijo: str = "Progreso"):
 
 def formatear_bytes(bytes_size: int) -> str:
     """
-    Formatea bytes a una unidad legible
+    Format bytes into a readable unit
     
     Args:
-        bytes_size: Tamaño en bytes
+        bytes_size: Size in bytes
         
     Returns:
-        String formateado (ej: "1.5 MB")
+        Formatted string (e.g. "1.5 MB")
     """
     for unidad in ['B', 'KB', 'MB', 'GB', 'TB']:
         if bytes_size < 1024.0:
@@ -92,21 +98,21 @@ def formatear_bytes(bytes_size: int) -> str:
 
 def validar_url(url: str) -> tuple:
     """
-    Valida que una URL tenga formato correcto y retorna detalles
+    Validate URL format and return details
     
     Args:
-        url: URL a validar
+        url: URL to validate
         
     Returns:
-        Tupla (es_valida, mensaje_error)
+        Tuple (is_valid, error_message)
     """
     import re
     
     if not url:
-        return (False, "La URL no puede estar vacía")
+        return (False, "URL cannot be empty")
     
     if not url.startswith(('http://', 'https://')):
-        return (False, "La URL debe comenzar con http:// o https://")
+        return (False, "URL must start with http:// or https://")
     
     patron = re.compile(
         r'^https?://'
@@ -117,20 +123,20 @@ def validar_url(url: str) -> tuple:
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
     
     if not patron.match(url):
-        return (False, "El formato de la URL no es válido")
+        return (False, "URL format is not valid")
     
     return (True, None)
 
 
 def validar_url_corta(url: str) -> bool:
     """
-    Valida rápidamente si es una URL (sin mensaje detallado)
+    Quickly validate a URL (no detailed message)
     
     Args:
-        url: URL a validar
+        url: URL to validate
         
     Returns:
-        True si parece válida
+        True if it looks valid
     """
     if not url:
         return False
@@ -144,18 +150,18 @@ def validar_url_corta(url: str) -> bool:
 
 def mostrar_ayuda(opcion: str):
     """
-    Muestra la ayuda para una opción específica
+    Show help for a specific option
     
     Args:
-        opcion: Número de opción de ayuda
+        opcion: Help option number
     """
     from pyfiglet import Figlet
     
-    # Cargar ayuda desde JSON
+    # Load help from JSON
     ayuda_file = ASSETS_DIR / "help.json"
     
     if not ayuda_file.exists():
-        print(Fore.RED + "\n❌ Archivo de ayuda no encontrado")
+        print(Fore.RED + "\n❌ Help file not found")
         pausar()
         return
     
@@ -163,39 +169,47 @@ def mostrar_ayuda(opcion: str):
         with open(ayuda_file, 'r', encoding='utf-8') as f:
             ayuda_data = json.load(f)
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error al cargar ayuda: {e}")
+        print(Fore.RED + f"\n❌ Error loading help: {e}")
         pausar()
         return
     
     ayuda = ayuda_data.get(opcion, {
-        "titulo": "Ayuda no disponible",
-        "mensaje": "La ayuda para esta opción no está disponible."
+        "title": "Help unavailable",
+        "titulo": "Help unavailable",
+        "message": "Help for this option is not available.",
+        "mensaje": "Help for this option is not available."
     })
+
+    # Back-compat: support both English and legacy Spanish keys
+    titulo = ayuda.get("title") or ayuda.get("titulo", "Help")
+    mensaje = ayuda.get("message") or ayuda.get("mensaje", "")
+    pasos = ayuda.get("steps") or ayuda.get("pasos", [])
+    consejos = ayuda.get("tips") or ayuda.get("consejos", [])
     
     limpiar_pantalla()
     
-    # Título
+    # Title
     figlet = Figlet(font="slant")
-    titulo_ascii = figlet.renderText(ayuda["titulo"])
+    titulo_ascii = figlet.renderText(titulo)
     for linea in titulo_ascii.splitlines():
         print(Fore.YELLOW + centrar_texto(linea))
     
-    print(Fore.CYAN + centrar_texto("📖 MANUAL DE USUARIO 📖\n"))
+    print(Fore.CYAN + centrar_texto("📖 USER MANUAL 📖\n"))
     print(Fore.MAGENTA + "═" * 80)
     
-    # Mensaje
-    print(Fore.WHITE + f"\n{ayuda['mensaje']}\n")
+    # Message
+    print(Fore.WHITE + f"\n{mensaje}\n")
     
-    # Pasos si existen
-    if "pasos" in ayuda:
-        print(Fore.CYAN + "📝 Pasos a seguir:\n")
-        for i, paso in enumerate(ayuda["pasos"], 1):
+    # Steps if present
+    if pasos:
+        print(Fore.CYAN + "📝 Steps:\n")
+        for i, paso in enumerate(pasos, 1):
             print(Fore.GREEN + f"  {i}. {paso}")
     
-    # Consejos si existen
-    if "consejos" in ayuda:
-        print(Fore.YELLOW + "\n💡 Consejos:\n")
-        for consejo in ayuda["consejos"]:
+    # Tips if present
+    if consejos:
+        print(Fore.YELLOW + "\n💡 Tips:\n")
+        for consejo in consejos:
             print(Fore.WHITE + f"  • {consejo}")
     
     print(Fore.MAGENTA + "\n" + "═" * 80)
@@ -204,41 +218,41 @@ def mostrar_ayuda(opcion: str):
 
 def crear_directorio_seguro(ruta: Path) -> bool:
     """
-    Crea un directorio de forma segura
+    Safely create a directory
     
     Args:
-        ruta: Path del directorio
+        ruta: Directory path
         
     Returns:
-        True si se creó o ya existía
+        True if created or already existed
     """
     try:
         ruta.mkdir(parents=True, exist_ok=True)
         return True
     except PermissionError:
-        print(Fore.RED + f"❌ Sin permisos para crear: {ruta}")
+        print(Fore.RED + f"❌ No permission to create: {ruta}")
         return False
     except Exception as e:
-        print(Fore.RED + f"❌ Error al crear directorio: {e}")
+        print(Fore.RED + f"❌ Error creating directory: {e}")
         return False
 
 
 def verificar_dependencias() -> dict:
     """
-    Verifica que las dependencias necesarias estén instaladas
+    Check that required dependencies are installed
     
     Returns:
-        Diccionario con estado de cada dependencia
+        Dict with status of each dependency
     """
     import subprocess
     
     dependencias = {
         "ffmpeg": False,
         "yt-dlp": False,
-        "python": True  # Ya está si ejecuta esto
+        "python": True  # Already running if this executes
     }
     
-    # Verificar FFmpeg
+    # Check FFmpeg
     try:
         subprocess.run(["ffmpeg", "-version"], 
                       capture_output=True, 
@@ -247,7 +261,7 @@ def verificar_dependencias() -> dict:
     except:
         pass
     
-    # Verificar yt-dlp
+    # Check yt-dlp
     try:
         subprocess.run(["yt-dlp", "--version"], 
                       capture_output=True, 
@@ -260,7 +274,7 @@ def verificar_dependencias() -> dict:
 
 
 def mostrar_banner_inicio():
-    """Muestra un banner de bienvenida al iniciar"""
+    """Show a welcome banner on startup"""
     import pyfiglet
     from config.settings import PROJECT_NAME, VERSION, WEBSITE
     
@@ -270,8 +284,16 @@ def mostrar_banner_inicio():
     for linea in titulo.splitlines():
         print(Fore.CYAN + centrar_texto(linea))
     
-    print(Fore.YELLOW + centrar_texto(f"Versión {VERSION}"))
+    print(Fore.YELLOW + centrar_texto(f"Version {VERSION}"))
     print(Fore.MAGENTA + centrar_texto(f"🌐 {WEBSITE}"))
-    print(Fore.WHITE + centrar_texto("Presiona Enter para continuar..."))
+    print(Fore.WHITE + centrar_texto("Press Enter to continue..."))
     
     input()
+
+
+# English aliases (new API) — keep Spanish names for backward compat
+clear_screen = limpiar_pantalla
+center_text = centrar_texto
+pause = pausar
+show_help = mostrar_ayuda
+format_bytes = formatear_bytes

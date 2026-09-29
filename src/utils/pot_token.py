@@ -1,9 +1,9 @@
 """
-Módulo de gestión de PO Token para YouTube
-Autor: Shadow-TermDev
+YouTube PO Token manager
+Author: Shadow-TermDev
 
-Este módulo usa bgutil-ytdlp-pot-provider para generar PO Tokens
-automáticamente cuando yt-dlp los necesita.
+This module uses bgutil-ytdlp-pot-provider to auto-generate PO Tokens
+when yt-dlp needs them.
 """
 
 import subprocess
@@ -16,7 +16,7 @@ _verificado = False
 
 def verificar_instalacion() -> bool:
     """
-    Verifica si bgutil-ytdlp-pot-provider está instalado
+    Check if bgutil-ytdlp-pot-provider is installed
     """
     global _instalado, _verificado
     
@@ -37,23 +37,23 @@ def verificar_instalacion() -> bool:
     _verificado = True
     
     if not _instalado:
-        print(Fore.RED + "\n⚠️  PO Token Provider no está instalado")
-        print(Fore.YELLOW + "   → Instala con: pip install bgutil-ytdlp-pot-provider")
+        print(Fore.RED + "\n⚠️  PO Token provider is not installed")
+        print(Fore.YELLOW + "   → Install with: pip install bgutil-ytdlp-pot-provider")
     
     return _instalado
 
 
 def iniciar_si_necesario() -> bool:
     """
-    Verifica e inicializa el PO Token si está disponible
+    Check and init the PO Token if available
     """
     return verificar_instalacion()
 
 
 def obtener_opts_pot() -> dict:
     """
-    Retorna las opciones para usar PO Token con yt-dlp
-    El plugin bgutil se activa automáticamente al estar instalado
+    Return options to use PO Token with yt-dlp
+    The bgutil plugin activates automatically when installed
     """
     if not verificar_instalacion():
         return {}
@@ -69,7 +69,7 @@ def obtener_opts_pot() -> dict:
 
 def obtener_opts_video() -> dict:
     """
-    Opciones optimizadas para video con PO Token
+    Optimized video options with PO Token
     """
     opts = {
         'quiet': True,
@@ -87,19 +87,27 @@ def obtener_opts_video() -> dict:
 
 def obtener_opts_audio() -> dict:
     """
-    Opciones optimizadas para audio con PO Token
+    Optimized audio options with PO Token
     """
     return obtener_opts_video()
 
 
 def mensaje_error_youtube():
     """
-    Muestra mensaje de error cuando YouTube falla
+    Show an error message when YouTube fails
     """
     if verificar_instalacion():
-        print(Fore.YELLOW + "\n⚠️  YouTube está bloqueando esta IP")
-        print(Fore.CYAN + "   → Intenta usar VPN o esperar unos minutos")
+        print(Fore.YELLOW + "\n⚠️  YouTube is blocking this IP")
+        print(Fore.CYAN + "   → Try a VPN or wait a few minutes")
     else:
-        print(Fore.RED + "\n⚠️  YouTube está bloqueando las descargas")
-        print(Fore.YELLOW + "   → Instala PO Token: pip install bgutil-ytdlp-pot-provider")
-    print(Fore.CYAN + "   → O usa cookies: yt-dlp --cookies-from-browser chrome URL")
+        print(Fore.RED + "\n⚠️  YouTube is blocking downloads")
+        print(Fore.YELLOW + "   → Install PO Token: pip install bgutil-ytdlp-pot-provider")
+    print(Fore.CYAN + "   → Or use cookies: yt-dlp --cookies-from-browser chrome URL")
+
+
+# English aliases
+check_installed = verificar_instalacion
+ensure_started = iniciar_si_necesario
+get_pot_opts = obtener_opts_pot
+get_video_opts = obtener_opts_video
+get_audio_opts = obtener_opts_audio

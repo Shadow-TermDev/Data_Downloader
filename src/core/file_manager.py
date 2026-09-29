@@ -1,6 +1,6 @@
 """
-Gestor de archivos y búsqueda en el sistema
-Autor: Shadow-TermDev
+File manager and on-device search
+Author: Shadow-TermDev
 """
 
 import os
@@ -14,19 +14,19 @@ from src.utils.boxes import print_warning_box
 
 def buscar_archivo(nombre_archivo: str, carpeta_base: Path = None) -> Optional[Path]:
     """
-    Busca un archivo en el almacenamiento del dispositivo
+    Search for a file on device storage
     
     Args:
-        nombre_archivo: Nombre del archivo a buscar
-        carpeta_base: Directorio base donde iniciar la búsqueda
+        nombre_archivo: File name to search
+        carpeta_base: Base directory to start from
         
     Returns:
-        Path del archivo si se encuentra, None en caso contrario
+        File Path if found, None otherwise
     """
     if carpeta_base is None:
         carpeta_base = STORAGE_BASE
     
-    print(Fore.CYAN + f"🔍 Buscando '{nombre_archivo}'...")
+    print(Fore.CYAN + f"🔍 Searching for '{nombre_archivo}'...")
     
     def _coincidencia_exacta(carpeta: Path):
         try:
@@ -37,22 +37,22 @@ def buscar_archivo(nombre_archivo: str, carpeta_base: Path = None) -> Optional[P
             return None
         return None
     
-    # Buscar primero en los directorios de descarga de la app (más rápido)
+    # Search app download dirs first (faster)
     for directorio in (VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR):
         if directorio.exists():
             encontrado = _coincidencia_exacta(directorio)
             if encontrado:
-                print(Fore.GREEN + f"✅ Archivo encontrado: {encontrado}")
+                print(Fore.GREEN + f"✅ File found: {encontrado}")
                 return encontrado
     
-    # Si no, búsqueda general en el almacenamiento
+    # Otherwise, general storage search
     encontrado = _coincidencia_exacta(carpeta_base)
     if encontrado:
-        print(Fore.GREEN + f"✅ Archivo encontrado: {encontrado}")
+        print(Fore.GREEN + f"✅ File found: {encontrado}")
         return encontrado
     
-    # Búsqueda con coincidencia parcial
-    print(Fore.YELLOW + "No se encontró coincidencia exacta. Buscando similares...")
+    # Partial-match search
+    print(Fore.YELLOW + "No exact match found. Looking for similar files...")
     
     archivos_similares = []
     nombre_lower = nombre_archivo.lower()
@@ -67,24 +67,24 @@ def buscar_archivo(nombre_archivo: str, carpeta_base: Path = None) -> Optional[P
         pass
     
     if archivos_similares:
-        print(Fore.CYAN + "\n📁 Archivos similares encontrados:")
+        print(Fore.CYAN + "\n📁 Similar files found:")
         for i, archivo in enumerate(archivos_similares, 1):
             print(Fore.WHITE + f"  {i}. {archivo.name}")
             print(Fore.BLUE + f"     {archivo.parent}")
         
         from src.utils.animations import mostrar_cursor, ocultar_cursor
         mostrar_cursor()
-        seleccion = input(Fore.YELLOW + "\n¿Usar alguno de estos? (1-5, Enter=ninguno): ").strip()
+        seleccion = input(Fore.YELLOW + "\nUse any of these? (1-5, Enter=none): ").strip()
         ocultar_cursor()
         
         if seleccion.isdigit() and 1 <= int(seleccion) <= len(archivos_similares):
             archivo_seleccionado = archivos_similares[int(seleccion) - 1]
-            print(Fore.GREEN + f"✅ Usando: {archivo_seleccionado.name}")
+            print(Fore.GREEN + f"✅ Using: {archivo_seleccionado.name}")
             return archivo_seleccionado
     
     print(Fore.RED + f"❌ {MESSAGES['file_not_found']}: '{nombre_archivo}'")
     
-    # Pausar antes de volver
+    # Pause before going back
     from src.utils.helpers import pausar
     pausar()
     return None
@@ -92,28 +92,28 @@ def buscar_archivo(nombre_archivo: str, carpeta_base: Path = None) -> Optional[P
 
 def obtener_extension(ruta: Path) -> str:
     """
-    Obtiene la extensión de un archivo sin el punto
+    Get a file extension without the dot
     
     Args:
-        ruta: Path del archivo
+        ruta: File path
         
     Returns:
-        Extensión en minúsculas (sin punto)
+        Lowercase extension (no dot)
     """
     return ruta.suffix.lstrip('.').lower()
 
 
-def generar_nombre_salida(ruta_original: Path, sufijo: str = "_procesado", nueva_extension: str = None) -> Path:
+def generar_nombre_salida(ruta_original: Path, sufijo: str = "_processed", nueva_extension: str = None) -> Path:
     """
-    Genera un nombre para archivo de salida
+    Build an output file name
     
     Args:
-        ruta_original: Path del archivo original
-        sufijo: Sufijo a agregar al nombre (default: "_procesado")
-        nueva_extension: Nueva extensión si se quiere cambiar
+        ruta_original: Original file path
+        sufijo: Suffix to append (default: "_procesado")
+        nueva_extension: New extension if you want to change it
         
     Returns:
-        Path del nuevo archivo
+        New file path
     """
     nombre_base = ruta_original.stem
     extension = nueva_extension if nueva_extension else ruta_original.suffix
@@ -126,38 +126,38 @@ def generar_nombre_salida(ruta_original: Path, sufijo: str = "_procesado", nueva
 
 def verificar_espacio_disponible(directorio: Path, tamano_requerido_mb: float = 100) -> bool:
     """
-    Verifica si hay suficiente espacio en disco
+    Check for enough free disk space
     
     Args:
-        directorio: Directorio a verificar
-        tamano_requerido_mb: Espacio requerido en MB
+        directorio: Directory to check
+        tamano_requerido_mb: Required space in MB
         
     Returns:
-        True si hay suficiente espacio
+        True if there is enough space
     """
     try:
         stat = os.statvfs(directorio)
         espacio_libre_mb = (stat.f_bavail * stat.f_frsize) / (1024 * 1024)
         
         if espacio_libre_mb < tamano_requerido_mb:
-            print(Fore.YELLOW + f"⚠️ Poco espacio disponible: {espacio_libre_mb:.1f} MB")
+            print(Fore.YELLOW + f"⚠️ Low free space: {espacio_libre_mb:.1f} MB")
             return False
         
         return True
     except Exception:
-        # Si no se puede verificar, asumir que hay espacio
+        # If it can't be checked, assume there is space
         return True
 
 
 def obtener_info_archivo(ruta: Path) -> dict:
     """
-    Obtiene información detallada de un archivo
+    Get detailed file info
     
     Args:
-        ruta: Path del archivo
+        ruta: File path
         
     Returns:
-        Diccionario con información del archivo
+        Dict with file info
     """
     if not ruta.exists():
         return {}
@@ -177,15 +177,15 @@ def obtener_info_archivo(ruta: Path) -> dict:
 
 def listar_archivos_recientes(directorio: Path, extension: str = None, limite: int = 10) -> list:
     """
-    Lista los archivos más recientes en un directorio
+    List the most recent files in a directory
     
     Args:
-        directorio: Directorio a listar
-        extension: Filtrar por extensión (opcional)
-        limite: Número máximo de archivos a retornar
+        directorio: Directory to list
+        extension: Filter by extension (optional)
+        limite: Max files to return
         
     Returns:
-        Lista de Path ordenados por fecha de modificación
+        List of Paths sorted by mtime
     """
     try:
         archivos = []
@@ -195,56 +195,65 @@ def listar_archivos_recientes(directorio: Path, extension: str = None, limite: i
             if archivo.is_file():
                 archivos.append(archivo)
         
-        # Ordenar por fecha de modificación (más recientes primero)
+        # Sort by mtime (newest first)
         archivos.sort(key=lambda x: x.stat().st_mtime, reverse=True)
         
         return archivos[:limite]
     
     except Exception as e:
-        print(Fore.RED + f"Error al listar archivos: {e}")
+        print(Fore.RED + f"Error listing files: {e}")
         return []
 
 
 def eliminar_archivo_seguro(ruta: Path) -> bool:
     """
-    Elimina un archivo de forma segura con confirmación
+    Safely delete a file with confirmation
     
     Args:
-        ruta: Path del archivo a eliminar
+        ruta: File path to delete
         
     Returns:
-        True si se eliminó correctamente
+        True if deleted successfully
     """
     try:
         if not ruta.exists():
-            print(Fore.RED + "El archivo no existe")
+            print(Fore.RED + "File does not exist")
             return False
         
         info = obtener_info_archivo(ruta)
-        print_warning_box("⚠️  ¿ELIMINAR ARCHIVO?", [
+        print_warning_box("⚠️  DELETE FILE?", [
             f"📝 {info['nombre']}",
             f"💾 {info['tamano_mb']} MB",
             f"📁 {info['directorio']}",
-            "1 - Sí, eliminar",
-            "2 - No, conservar",
+            "1 - Yes, delete",
+            "2 - No, keep",
         ], [Fore.WHITE, Fore.WHITE, Fore.WHITE, Fore.GREEN, Fore.RED])
         
         from src.utils.animations import mostrar_cursor, ocultar_cursor
         mostrar_cursor()
-        choice = input(Fore.CYAN + "\n  -> Tu elección [1-2]: " + Style.RESET_ALL).strip()
+        choice = input(Fore.CYAN + "\n  -> Your choice [1-2]: " + Style.RESET_ALL).strip()
         ocultar_cursor()
         
         if choice == "1":
             ruta.unlink()
-            print(Fore.GREEN + "✅ Archivo eliminado correctamente")
+            print(Fore.GREEN + "✅ File deleted successfully")
             return True
         else:
-            print(Fore.CYAN + "✅ Archivo conservado")
+            print(Fore.CYAN + "✅ File kept")
             return False
     
     except PermissionError:
-        print(Fore.RED + "❌ Permiso denegado para eliminar el archivo")
+        print(Fore.RED + "❌ Permission denied to delete the file")
         return False
     except Exception as e:
-        print(Fore.RED + f"❌ Error al eliminar: {e}")
+        print(Fore.RED + f"❌ Delete error: {e}")
         return False
+
+
+# English aliases (new API)
+find_file = buscar_archivo
+get_extension = obtener_extension
+build_output_name = generar_nombre_salida
+get_file_info = obtener_info_archivo
+list_recent_files = listar_archivos_recientes
+delete_file_safe = eliminar_archivo_seguro

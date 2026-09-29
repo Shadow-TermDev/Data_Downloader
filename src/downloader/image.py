@@ -1,6 +1,6 @@
 """
-Módulo de descarga de imágenes
-Autor: Shadow-TermDev
+Image download module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -20,7 +20,7 @@ from src.utils.boxes import (
 
 
 def generar_nombre_limpio(url: str, formato: str) -> str:
-    """Genera un nombre limpio para la imagen"""
+    """Build a clean file name for the image"""
     nombre = url.split("/")[-1].split("?")[0]
 
     if not nombre or "." not in nombre:
@@ -37,12 +37,12 @@ def generar_nombre_limpio(url: str, formato: str) -> str:
 
 
 def descargar_imagen(url: str):
-    """Descarga una imagen de una URL"""
+    """Download an image from a URL"""
     ocultar_cursor()
 
     try:
         # Caja de análisis
-        print_info_box("🖼️  DESCARGANDO IMAGEN")
+        print_info_box("🖼️  DOWNLOADING IMAGE")
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 '
@@ -77,7 +77,7 @@ def descargar_imagen(url: str):
         try:
             img = Image.open(data)
         except UnidentifiedImageError:
-            print_error_box("❌ ERROR", ["El enlace no es una imagen válida"])
+            print_error_box("❌ ERROR", ["The link is not a valid image"])
             return
 
         ancho, alto = img.size
@@ -120,23 +120,23 @@ def descargar_imagen(url: str):
             tamaño_guardado = ruta_final.stat().st_size / (1024 * 1024)
 
             print()
-            print_success_box("✅ DESCARGA COMPLETADA", [
-                f"📐 Resolución: {ancho} × {alto}",
-                f"📦 Formato: {formato}",
-                f"💾 Tamaño: {tamaño_guardado:.2f} MB",
+            print_success_box("✅ DOWNLOAD COMPLETED", [
+                f"📐 Resolution: {ancho} × {alto}",
+                f"📦 Format: {formato}",
+                f"💾 Size: {tamaño_guardado:.2f} MB",
                 "📁 Pictures/Picture_Downloader"
             ])
         else:
-            print_error_box("❌ ERROR", ["Error al guardar la imagen"])
+            print_error_box("❌ ERROR", ["Error saving image"])
 
     except requests.exceptions.Timeout:
-        print_error_box("❌ TIMEOUT", ["La imagen tardó demasiado en descargarse"])
+        print_error_box("❌ TIMEOUT", ["Image download timed out"])
     except requests.exceptions.ConnectionError:
-        print_error_box("❌ ERROR DE CONEXIÓN", ["No se pudo conectar al servidor"])
+        print_error_box("❌ ERROR DE CONEXIÓN", ["Could not connect to the server"])
     except requests.exceptions.HTTPError as e:
-        print_error_box("❌ ERROR HTTP", [f"Código: {e.response.status_code}"])
+        print_error_box("❌ ERROR HTTP", [f"Code: {e.response.status_code}"])
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
+        print(Fore.YELLOW + "\n⚠️  Download cancelled")
     except Exception as e:
         print_error_box("❌ ERROR", [f"Error: {str(e)[:50]}"])
     finally:

@@ -2,67 +2,68 @@
 
 # 🎬 Data Downloader
 
-### **La herramienta definitiva para descargar, convertir y mejorar multimedia en Termux**
+### **The ultimate toolkit to download, convert and enhance media on Termux**
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.6.0-success.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.7.0-success.svg?style=for-the-badge)
 
-**Descarga, mejora y convierte videos, audios e imágenes — TODO desde tu celular.**
+**Download, enhance and convert videos, audios and images — ALL from your phone.**
 
-[🌐 Sitio Web](https://Shadow-TermDev.github.io) • [🐛 Reportar Bug](https://github.com/Shadow-TermDev/Data_Downloader/issues) • [✨ Solicitar Feature](https://github.com/Shadow-TermDev/Data_Downloader/issues)
+[🌐 Website](https://Shadow-TermDev.github.io) • [🐛 Report Bug](https://github.com/Shadow-TermDev/Data_Downloader/issues) • [✨ Request Feature](https://github.com/Shadow-TermDev/Data_Downloader/issues)
 
 ---
 
-## 🌟 Características
+## 🌟 Features
 
-### 📥 Descargador
-- ✅ Videos de YouTube, TikTok, Instagram y más
-- ✅ Audio en alta calidad (hasta 320kbps)
-- ✅ Imágenes con resolución original
-- ✅ Sin marcas de agua
-- ✅ Metadatos y portadas incluidos
-- ✅ Soporte para PO Token (anti-bot)
-- ✅ Interfaz mejorada y más limpia
+### 📥 Downloader
+- ✅ Videos from YouTube, TikTok, Instagram and more
+- ✅ High-quality audio (up to 320kbps)
+- ✅ Images at original resolution
+- ✅ No watermarks
+- ✅ Metadata and covers included
+- ✅ PO Token support (anti-bot)
+- ✅ Clean, improved interface (TokenHub/player-style header)
+- ✅ 🔎 YouTube search prototype (search & download without leaving the app)
 
-### 🔄 Convertidor
+### 🔄 Converter
 - ✅ **Video:** MP4, MKV, AVI, MOV, WebM
 - ✅ **Audio:** MP3, WAV, AAC, FLAC, OGG, M4A
-- ✅ **Imagen:** PNG, JPG, WebP, BMP, GIF
-- ✅ Extracción de audio desde video
-- ✅ Preservación de metadatos
+- ✅ **Image:** PNG, JPG, WebP, BMP, GIF
+- ✅ Audio extraction from video
+- ✅ Metadata preservation
 
-### ⬆️ Mejorador de Calidad
-- ✅ Upscaling de video hasta 4K
-- ✅ Mejora de bitrate de audio
-- ✅ Aumento de resolución de imágenes
-- ✅ Filtros de nitidez y contraste
+### ⬆️ Quality Enhancer
+- ✅ Video upscaling up to 4K
+- ✅ Audio bitrate boost
+- ✅ Image resolution boost
+- ✅ Sharpness and contrast filters
 
 ---
 
-## 🚀 Instalación Rápida
+## 🚀 Quick Install
 
-### Requisitos Previos
+### Prerequisites
 - Android 7.0+
-- Termux desde [F-Droid](https://f-droid.org/packages/com.termux/)
+- Termux from [F-Droid](https://f-droid.org/packages/com.termux/)
 
-### 📱 Instalación Paso a Paso
+### 📱 Step-by-step Install
 
-1. **Abre Termux y ejecuta:**
+1. **Open Termux and run:**
 
    ```bash
    termux-setup-storage
    ```
 
-2. **Actualiza paquetes e instala dependencias:**
+2. **Update packages and install dependencies:**
 
    ```bash
    pkg update -y && pkg upgrade -y
    pkg install python ffmpeg git -y
    ```
 
-3. **Clona el repositorio e instala:**
+3. **Clone the repo and install:**
 
    ```bash
    git clone https://github.com/Shadow-TermDev/Data_Downloader.git
@@ -70,46 +71,46 @@
    pip install -r requirements.txt
    ```
 
-4. **Ejecuta el programa:**
+4. **Run the app:**
 
    ```bash
    python src/main.py
    ```
    
-   O usa el script de inicio:
+   Or use the launcher script:
    ```bash
    chmod +x start && ./start
    ```
 
 ---
 
-## 📖 Uso
+## 📖 Usage
 
-Una vez ejecutado el programa, puedes descargar audios y videos usando el enlace correspondiente. Sigue las instrucciones en pantalla para seleccionar el formato y la calidad deseada.
+Once the app is running, you can download audios and videos with the matching link. Follow the on-screen instructions to pick format and quality. You can also press **4 - Search YouTube** to search first (prototype, top 8 results) and download straight away.
 
-### 📥 Directorios de salida
+### 📥 Output directories
 
-Los archivos se guardan automáticamente en carpetas organizadas:
+Files are auto-saved into organized folders:
 
-| Tipo      | Directorio                                           |
-|-----------|------------------------------------------------------|
-| 🎬 Video  | `/storage/emulated/0/Movies/Videos_Downloader`       |
-| 🎵 Audio  | `/storage/emulated/0/Music/Music_Downloader`         |
-| 🖼️ Imagen | `/storage/emulated/0/Pictures/Picture_Downloader`    |
+| Type      | Directory                                        |
+|-----------|--------------------------------------------------|
+| 🎬 Video  | `/storage/emulated/0/Movies/Videos_Downloader`   |
+| 🎵 Audio  | `/storage/emulated/0/Music/Music_Downloader`     |
+| 🖼️ Image  | `/storage/emulated/0/Pictures/Picture_Downloader`|
 
-> El convertidor y el mejorador guardan los archivos procesados junto al original con los sufijos `_convertido`, `_audio`, `_mejorado` o `_mejorada`.
+> The converter and enhancer save processed files next to the original with `_converted`, `_audio`, `_enhanced` suffixes.
 
-### ⚠️ Solución de problemas
+### ⚠️ Troubleshooting
 
-- **YouTube bloquea las descargas** ("Sign in to confirm"): instala el proveedor de PO Token con `pip install bgutil-ytdlp-pot-provider` o usa una VPN.
-- **TikTok / Facebook piden cookies** (error 403): exporta las cookies de tu navegador con `yt-dlp --cookies-from-browser chrome URL`.
-- **Mantén yt-dlp actualizado** para evitar fallos con cambios de plataformas: `pip install -U yt-dlp`.
-- **FFmpeg es necesario** para conversiones, mejoras e incrustar portadas: `pkg install ffmpeg`.
+- **YouTube blocks downloads** ("Sign in to confirm"): install the PO Token provider with `pip install bgutil-ytdlp-pot-provider` or use a VPN.
+- **TikTok / Facebook ask for cookies** (403 error): export your browser cookies with `yt-dlp --cookies-from-browser chrome URL`.
+- **Keep yt-dlp updated** to avoid platform breakage: `pip install -U yt-dlp`.
+- **FFmpeg is required** for conversions, enhancements and cover embedding: `pkg install ffmpeg`.
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+This project is under the MIT license. See [LICENSE](LICENSE) for details.
 
 </div>

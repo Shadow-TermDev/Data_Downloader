@@ -1,6 +1,6 @@
 """
-Módulo de descarga de videos
-Autor: Shadow-TermDev
+Video download module
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -19,7 +19,7 @@ from src.utils.boxes import (
 
 
 def es_facebook(url: str) -> bool:
-    """Detecta si la URL es de Facebook (cualquier tipo)"""
+    """Detect if the URL is Facebook (any kind)"""
     url_lower = url.lower()
     return (
         'facebook.com' in url_lower or
@@ -31,13 +31,13 @@ def es_facebook(url: str) -> bool:
 
 def resolver_facebook_url(url: str) -> str:
     """
-    Convierte un link de Facebook share a su URL real
-    usando yt-dlp sin descargar
+    Resolve a Facebook share link to its real URL
+    using yt-dlp without downloading
     """
     if not es_facebook(url):
         return url
 
-    print("🔄 Resolviendo enlace de Facebook...")
+    print("🔄 Resolving Facebook link...")
 
     ydl_opts = {
         'quiet': True,
@@ -51,18 +51,18 @@ def resolver_facebook_url(url: str) -> str:
 
             if 'webpage_url' in info:
                 real_url = info['webpage_url']
-                print(f"✅ URL resuelta: {real_url}")
+                print(f"✅ Resolved URL: {real_url}")
                 return real_url
 
     except Exception as e:
-        print(f"⚠️ No se pudo resolver el link: {str(e)[:60]}")
+        print(f"⚠️ Could not resolve link: {str(e)[:60]}")
 
     return url
 
 
 def obtener_archivo_descargado(info: dict) -> Path:
     """
-    Obtiene el Path del archivo descargado desde la info de yt-dlp
+    Get the downloaded file Path from yt-dlp info
     """
     try:
         for download in info.get('requested_downloads', []):
@@ -77,7 +77,7 @@ def obtener_archivo_descargado(info: dict) -> Path:
 
 
 def progreso_hook(d):
-    """Hook para mostrar progreso de descarga"""
+    """Hook to show download progress"""
     if d['status'] == 'downloading':
         try:
             percent = d.get('_percent_str', '0%').strip()
@@ -93,13 +93,13 @@ def progreso_hook(d):
 
 
 def es_tiktok(url: str) -> bool:
-    """Detecta si la URL es de TikTok"""
+    """Detect if the URL is TikTok"""
     url_lower = url.lower()
     return 'tiktok.com' in url_lower or 'vm.tiktok.com' in url_lower or 'musical.ly' in url_lower
 
 
 def obtener_opciones_ytdlp(es_tiktok: bool = False, cookies_path: str = None, es_facebook: bool = False) -> dict:
-    """Obtiene opciones optimizadas para yt-dlp"""
+    """Get optimized yt-dlp options"""
     opts = {
         'quiet': True,
         'no_warnings': True,
@@ -134,7 +134,7 @@ def obtener_opciones_ytdlp(es_tiktok: bool = False, cookies_path: str = None, es
 
 def obtener_calidades_video(url: str) -> list:
     """
-    Obtiene las calidades disponibles para un video
+    Get available qualities for a video
     """
     pot_iniciado = pot_token.iniciar_si_necesario()
 
@@ -203,19 +203,19 @@ def obtener_calidades_video(url: str) -> list:
         if "Sign in to confirm" in ultimo_error:
             pot_token.mensaje_error_youtube()
         elif es_tk and "403" in ultimo_error:
-            print(Fore.YELLOW + "\n⚠️  TikTok requiere cookies de sesión")
-            print(Fore.CYAN + "   → Exporta cookies de TikTok desde navegador")
+            print(Fore.YELLOW + "\n⚠️  TikTok requires session cookies")
+            print(Fore.CYAN + "   → Export TikTok cookies from your browser")
         elif es_fb and "403" in ultimo_error:
-            print(Fore.YELLOW + "\n⚠️  Facebook requiere cookies de sesión")
-            print(Fore.CYAN + "   → Exporta cookies de Facebook desde navegador")
+            print(Fore.YELLOW + "\n⚠️  Facebook requires session cookies")
+            print(Fore.CYAN + "   → Export Facebook cookies from your browser")
         else:
             print(Fore.RED + f"\n❌ {ultimo_error[:60]}")
 
 
 def seleccionar_calidad(calidades: list) -> str:
-    """Permite al usuario seleccionar una calidad"""
+    """Let the user pick a quality"""
     if not calidades:
-        print_error_box("❌ NO HAY FORMATOS", ["No hay formatos de video disponibles"])
+        print_error_box("❌ NO FORMATS", ["No video formats available"])
         return None
 
     lines = []
@@ -228,28 +228,28 @@ def seleccionar_calidad(calidades: list) -> str:
             colors.append(Fore.WHITE)
             lines.append(f"  {i+1}. {label:<20} {size}")
 
-    print_selection_box("📺 SELECCIONA CALIDAD", lines, colors)
-    print(Fore.CYAN + "   ℹ️  La opción 1 es la mejor calidad disponible")
+    print_selection_box("📺 SELECT QUALITY", lines, colors)
+    print(Fore.CYAN + "   ℹ️  Option 1 is the best available quality")
 
     while True:
         mostrar_cursor()
-        sel = input(Fore.YELLOW + "\n➜ " + Fore.CYAN + "Elige calidad [1-8]: " + Style.RESET_ALL).strip()
+        sel = input(Fore.YELLOW + "\n➜ " + Fore.CYAN + "Pick quality [1-8]: " + Style.RESET_ALL).strip()
         ocultar_cursor()
 
         if sel.isdigit() and 1 <= int(sel) <= min(len(calidades), 8):
             calidad_elegida = calidades[int(sel) - 1]
-            print(Fore.GREEN + f"   ✓ Seleccionado: {calidad_elegida[1]}")
+            print(Fore.GREEN + f"   ✓ Selected: {calidad_elegida[1]}")
             return calidad_elegida[0]
 
-        print(Fore.RED + "   ❌ Opción inválida")
+        print(Fore.RED + "   ❌ Invalid option")
 
 
 def _descargar_con_opts(url: str, ydl_opts: dict, plataforma: str) -> bool:
-    """Descarga interna común. Retorna True si éxito."""
+    """Shared internal download. Returns True on success."""
     try:
         print()
-        print_success_box(f"📥 DESCARGANDO {plataforma.upper()}", [
-            "Por favor espera... el video se está descargando"
+        print_success_box(f"📥 DOWNLOADING {plataforma.upper()}", [
+            "Please wait... the video is downloading"
         ])
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -263,9 +263,9 @@ def _descargar_con_opts(url: str, ydl_opts: dict, plataforma: str) -> bool:
             seg_duracion = duracion % 60
 
         print()
-        print_success_box("✅ DESCARGA EXITOSA", [
+        print_success_box("✅ DOWNLOAD SUCCESSFUL", [
             f"📝 {titulo}",
-            f"⏱️  Duración: {min_duracion}:{seg_duracion:02d}   │   💾 Tamaño: {tamanho}",
+            f"⏱️  Duration: {min_duracion}:{seg_duracion:02d}   │   💾 Size: {tamanho}",
             f"📁 {VIDEOS_DIR.name}"
         ])
         return True
@@ -275,7 +275,7 @@ def _descargar_con_opts(url: str, ydl_opts: dict, plataforma: str) -> bool:
         _mostrar_error_descarga(error_msg, plataforma, es_tiktok(url), es_facebook(url))
         return False
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
+        print(Fore.YELLOW + "\n⚠️  Download cancelled")
         return False
     except Exception as e:
         print_error_box("❌ ERROR", [f"Error: {str(e)[:50]}"])
@@ -283,27 +283,27 @@ def _descargar_con_opts(url: str, ydl_opts: dict, plataforma: str) -> bool:
 
 
 def _mostrar_error_descarga(error_msg: str, plataforma: str, es_tk: bool, es_fb: bool):
-    """Muestra error de descarga en caja consistente"""
+    """Show a download error in a consistent box"""
     lines = []
     if "429" in error_msg:
-        lines.append("Demasiadas solicitudes. Espera unos minutos.")
+        lines.append("Too many requests. Wait a few minutes.")
     elif "403" in error_msg or "Forbidden" in error_msg:
         if es_tk:
-            lines.extend(["TikTok: Acceso bloqueado.", "Usa cookies de navegador para descargar"])
+            lines.extend(["TikTok: Access blocked.", "Use browser cookies to download"])
         elif es_fb:
-            lines.append("Facebook: Acceso bloqueado.")
+            lines.append("Facebook: Access blocked.")
         else:
-            lines.append("Acceso bloqueado. Video privado o restringido.")
+            lines.append("Access blocked. Private or restricted video.")
     elif "404" in error_msg:
-        lines.append("Video no encontrado. Verifica la URL.")
+        lines.append("Video not found. Check the URL.")
     else:
         lines.append(error_msg[:50])
-    print_error_box("❌ ERROR DE DESCARGA", lines)
+    print_error_box("❌ DOWNLOAD ERROR", lines)
 
 
 def descargar_video(url: str):
     """
-    Descarga un video de una URL
+    Download a video from a URL
     """
     ocultar_cursor()
 
@@ -314,13 +314,13 @@ def descargar_video(url: str):
     try:
         plataforma = "TikTok" if es_tk else ("Facebook" if es_fb else "Video")
 
-        # Caja de análisis (info)
-        print_info_box(f"🎬 ANALIZANDO {plataforma.upper()}")
+        # Analysis box (info)
+        print_info_box(f"🎬 ANALYZING {plataforma.upper()}")
 
         if es_tk:
-            print(Fore.YELLOW + " ⚠️  TikTok detectado - intentando métodos alternativos...")
+            print(Fore.YELLOW + " ⚠️  TikTok detected - trying alternate methods...")
 
-            # Intentar métodos TikTok simplificados
+            # Simplified TikTok methods
             metodos = [
                 {'quiet': False, 'no_warnings': False, 'extractor_args': {}},
                 {
@@ -340,7 +340,7 @@ def descargar_video(url: str):
                     **extra_opts
                 }
 
-                print(f"  ⏳ Método {i+1}/{len(metodos)}...")
+                print(f"  ⏳ Method {i+1}/{len(metodos)}...")
                 try:
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(url, download=True)
@@ -349,31 +349,31 @@ def descargar_video(url: str):
                             archivo = obtener_archivo_descargado(info)
                             tamanho = f"{archivo.stat().st_size / (1024*1024):.1f} MB" if archivo else "?"
                             print()
-                            print_success_box("✅ DESCARGA COMPLETADA", [
+                            print_success_box("✅ DOWNLOAD COMPLETED", [
                                 f"📝 {titulo}",
-                                f"💾 Tamaño: {tamanho}",
+                                f"💾 Size: {tamanho}",
                                 f"📁 {VIDEOS_DIR.name}"
                             ])
                             return
                 except Exception:
                     continue
 
-            print_error_box("❌ ERROR TIKTOK", ["No se pudo descargar con métodos disponibles"])
+            print_error_box("❌ TIKTOK ERROR", ["Could not download with available methods"])
             return
 
         if es_fb:
-            print(Fore.YELLOW + " ⚠️  Facebook detectado - puede requerir cookies")
+            print(Fore.YELLOW + " ⚠️  Facebook detected - may require cookies")
 
-        # Obtener calidades para selección
+        # Get qualities for selection
         calidades = obtener_calidades_video(url)
 
         if not calidades:
-            print_error_box("❌ SIN CALIDADES", ["No se pudieron obtener las calidades disponibles"])
+            print_error_box("❌ NO QUALITIES", ["Could not fetch available qualities"])
             return
 
         mejor_calidad = calidades[0][1]
         if '360p' in mejor_calidad or '480p' in mejor_calidad:
-            print(Fore.YELLOW + f" ⚠️  Mejor calidad disponible: {mejor_calidad}")
+            print(Fore.YELLOW + f" ⚠️  Best available quality: {mejor_calidad}")
 
         formato_id = seleccionar_calidad(calidades)
 
@@ -408,7 +408,7 @@ def descargar_video(url: str):
         pot_opts = pot_token.obtener_opts_pot()
         if pot_opts:
             ydl_opts.update(pot_opts)
-            print(Fore.CYAN + " ✓ PO Token activo")
+            print(Fore.CYAN + " ✓ PO Token active")
 
         if es_tk:
             ydl_opts['extractor_args'] = {
@@ -430,8 +430,17 @@ def descargar_video(url: str):
         _descargar_con_opts(url, ydl_opts, plataforma)
 
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n⚠️  Descarga cancelada")
+        print(Fore.YELLOW + "\n⚠️  Download cancelled")
     except Exception as e:
         print_error_box("❌ ERROR", [f"Error: {str(e)[:50]}"])
     finally:
         pausar()
+
+
+# English aliases
+is_facebook = es_facebook
+resolve_facebook_url = resolver_facebook_url
+is_tiktok = es_tiktok
+download_video = descargar_video
+get_video_qualities = obtener_calidades_video
+select_quality = seleccionar_calidad

@@ -1,51 +1,51 @@
 """
-Configuración centralizada del proyecto Data Downloader
-Autor: Shadow-TermDev
+Data Downloader central configuration
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
 from pathlib import Path
 
 # ============================================================
-# INFORMACIÓN DEL PROYECTO
+# PROJECT INFO
 # ============================================================
 
 PROJECT_NAME = "Data Downloader"
-VERSION = "v1.6.0"
+VERSION = "v1.7.0"
 AUTHOR = "Shadow-TermDev"
-AUTHOR_TITLE = "El Lord de Termux"
+AUTHOR_TITLE = "The Termux Lord"
 WEBSITE = "Shadow-TermDev.github.io"
 REPOSITORY = "github.com/Shadow-TermDev/Data_Downloader"
 LICENSE = "MIT"
 
 # ============================================================
-# RUTAS DEL SISTEMA
+# SYSTEM PATHS
 # ============================================================
 
-# Ruta base del almacenamiento Android
+# Android storage base path
 STORAGE_BASE = Path("/storage/emulated/0")
 
-# Directorios de salida
+# Output directories
 VIDEOS_DIR = STORAGE_BASE / "Movies" / "Videos_Downloader"
 AUDIO_DIR = STORAGE_BASE / "Music" / "Music_Downloader"
 IMAGES_DIR = STORAGE_BASE / "Pictures" / "Picture_Downloader"
 
-# Directorio del proyecto
+# Project directories
 PROJECT_ROOT = Path(__file__).parent.parent
 ASSETS_DIR = PROJECT_ROOT / "assets"
 CONFIG_FILE = ASSETS_DIR / "config.json"
 HELP_FILE = ASSETS_DIR / "help.json"
 
 # ============================================================
-# CONFIGURACIÓN DE DESCARGA
+# DOWNLOAD SETTINGS
 # ============================================================
 
-# Formatos soportados
+# Supported formats
 VIDEO_FORMATS = ["mp4", "mkv", "avi", "mov", "webm"]
 AUDIO_FORMATS = ["mp3", "wav", "ogg", "aac", "flac", "m4a"]
 IMAGE_FORMATS = ["png", "jpg", "jpeg", "webp", "bmp", "gif", "tiff", "ico"]
 
-# Calidades de video
+# Video qualities
 VIDEO_QUALITIES = {
     "4k": "2160p",
     "1080p": "1080p",
@@ -54,7 +54,7 @@ VIDEO_QUALITIES = {
     "360p": "360p"
 }
 
-# Bitrates de audio
+# Audio bitrates
 AUDIO_BITRATES = {
     "low": "128k",
     "medium": "256k",
@@ -62,34 +62,34 @@ AUDIO_BITRATES = {
 }
 
 # ============================================================
-# CONFIGURACIÓN DE CONVERSIÓN
+# CONVERSION SETTINGS
 # ============================================================
 
-# Extensiones reales por formato
+# Real extensions per format
 AUDIO_EXTENSIONS = {
     "mp3": "mp3",
     "wav": "wav",
     "flac": "flac",
     "ogg": "ogg",
     "m4a": "m4a",
-    "aac": "m4a"  # AAC se guarda como M4A
+    "aac": "m4a"  # AAC is stored as M4A
 }
 
-# Formatos con soporte de portada/thumbnail
+# Formats with cover/thumbnail support
 FORMATS_WITH_COVER = {"mp3", "flac", "m4a", "aac", "ogg"}
 
 # ============================================================
-# CONFIGURACIÓN DE MEJORA
+# ENHANCEMENT SETTINGS
 # ============================================================
 
-# Factores de escala para imágenes
+# Image scale factors
 IMAGE_SCALE_FACTORS = {
     "low": 1.2,
     "medium": 1.5,
     "high": 2.0
 }
 
-# Resoluciones de video
+# Video resolutions
 VIDEO_RESOLUTIONS = {
     "720p": "1280x720",
     "1080p": "1920x1080",
@@ -97,10 +97,10 @@ VIDEO_RESOLUTIONS = {
 }
 
 # ============================================================
-# CONFIGURACIÓN DE INTERFAZ
+# UI SETTINGS
 # ============================================================
 
-# Colores ANSI
+# ANSI colors
 COLORS = {
     "primary": "\033[95m",      # Magenta
     "secondary": "\033[96m",    # Cyan
@@ -111,17 +111,17 @@ COLORS = {
     "reset": "\033[0m"
 }
 
-# Fuentes para títulos (pyfiglet)
+# Title fonts (pyfiglet)
 TITLE_FONTS = {
     "main": "slant",
     "subtitle": "small"
 }
 
-# Ancho de cuadros/bordes
+# Box/border width
 BOX_WIDTH = 52
 
 # ============================================================
-# CONFIGURACIÓN DE ANIMACIONES
+# ANIMATION SETTINGS
 # ============================================================
 
 TRANSITION_TYPES = ["Fade", "Slide", "Zoom", "Wipe", "Flash"]
@@ -129,24 +129,24 @@ DEFAULT_TRANSITION = "Fade"
 ANIMATION_SPEED = 0.05
 
 # ============================================================
-# MENSAJES DEL SISTEMA
+# SYSTEM MESSAGES
 # ============================================================
 
 MESSAGES = {
     "welcome": f"{PROJECT_NAME} {VERSION}",
-    "goodbye": "¡Gracias por usar Data Downloader!",
-    "invalid_option": "Opción no válida",
-    "empty_input": "Entrada vacía. Por favor ingresa un valor",
-    "file_not_found": "Archivo no encontrado",
-    "download_success": "Descarga completada",
-    "conversion_success": "Conversión completada",
-    "enhancement_success": "Mejora completada",
-    "error_occurred": "Ocurrió un error",
-    "press_enter": "Presiona Enter para continuar...",
-    "processing": "Procesando...",
-    "downloading": "Descargando...",
-    "converting": "Convirtiendo...",
-    "saving": "Guardando..."
+    "goodbye": "Thanks for using Data Downloader!",
+    "invalid_option": "Invalid option",
+    "empty_input": "Empty input. Please enter a value",
+    "file_not_found": "File not found",
+    "download_success": "Download completed",
+    "conversion_success": "Conversion completed",
+    "enhancement_success": "Enhancement completed",
+    "error_occurred": "An error occurred",
+    "press_enter": "Press Enter to continue...",
+    "processing": "Processing...",
+    "downloading": "Downloading...",
+    "converting": "Converting...",
+    "saving": "Saving..."
 }
 
 # ============================================================
@@ -162,23 +162,23 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # ============================================================
 
 def create_directories():
-    """Crea los directorios necesarios si no existen"""
+    """Create required directories if missing"""
     directories = [VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR, ASSETS_DIR]
     for directory in directories:
         try:
             directory.mkdir(parents=True, exist_ok=True)
         except (PermissionError, OSError):
-            print(f"⚠️  No se pudo crear el directorio: {directory}")
+            print(f"⚠️  Could not create directory: {directory}")
 
 def get_output_dir(file_type: str) -> Path:
     """
-    Retorna el directorio de salida según el tipo de archivo
+    Return output directory by file type
     
     Args:
-        file_type: 'video', 'audio' o 'image'
+        file_type: 'video', 'audio' or 'image'
     
     Returns:
-        Path object del directorio correspondiente
+        Path object of the matching directory
     """
     mapping = {
         "video": VIDEOS_DIR,
@@ -189,14 +189,14 @@ def get_output_dir(file_type: str) -> Path:
 
 def is_valid_format(format_str: str, file_type: str) -> bool:
     """
-    Verifica si un formato es válido para el tipo de archivo
+    Check if a format is valid for the file type
     
     Args:
-        format_str: Formato a validar (ej: 'mp4', 'mp3')
-        file_type: Tipo de archivo ('video', 'audio', 'image')
+        format_str: Format to validate (e.g. 'mp4', 'mp3')
+        file_type: File type ('video', 'audio', 'image')
     
     Returns:
-        True si el formato es válido
+        True if the format is valid
     """
     format_map = {
         "video": VIDEO_FORMATS,

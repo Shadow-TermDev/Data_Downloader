@@ -1,4 +1,4 @@
-# Script de inicio de Data Downloader (sin shebang para compatibilidad con Termux)
+# Data Downloader launcher (no shebang for Termux compat)
 cd "$(dirname "$0")"
 if command -v python3 >/dev/null 2>&1; then
     exec python3 src/main.py

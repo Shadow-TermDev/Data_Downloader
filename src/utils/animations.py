@@ -1,6 +1,6 @@
 """
-Sistema de animaciones y efectos visuales
-Autor: Shadow-TermDev
+Animation and visual effects system
+Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
 """
 
@@ -11,96 +11,106 @@ import json
 from config.settings import ASSETS_DIR, DEFAULT_TRANSITION, ANIMATION_SPEED
 
 
-# Ruta del archivo de configuración
+# Config file path
 CONFIG_PATH = ASSETS_DIR / "config.json"
 
 
 # ============================================================
-# MANEJO DEL CURSOR
+# CURSOR HANDLING
 # ============================================================
 
 def ocultar_cursor():
-    """Oculta el cursor para mejorar la estética"""
+    """Hide the cursor for cleaner visuals"""
     sys.stdout.write("\033[?25l")
     sys.stdout.flush()
 
 
 def mostrar_cursor():
-    """Vuelve a mostrar el cursor"""
+    """Show the cursor again"""
     sys.stdout.write("\033[?25h")
     sys.stdout.flush()
 
 
 # ============================================================
-# MANEJO DE CONFIGURACIÓN
+# CONFIG HANDLING
 # ============================================================
 
 def cargar_config() -> dict:
     """
-    Carga la configuración actual desde config.json
+    Load current settings from config.json (supports legacy Spanish keys)
     
     Returns:
-        Diccionario con la configuración
+        Config dict
     """
-    # Crear archivo si no existe
+    # Create file if missing
     if not CONFIG_PATH.exists():
         config_inicial = {
-            "transicion": DEFAULT_TRANSITION,
-            "velocidad_animacion": ANIMATION_SPEED,
-            "tema": "default"
+            "transition": DEFAULT_TRANSITION,
+            "animation_speed": ANIMATION_SPEED,
+            "theme": "default"
         }
         guardar_config(config_inicial)
         return config_inicial
     
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            # Migrate legacy Spanish keys
+            if "transicion" in data and "transition" not in data:
+                data["transition"] = data.pop("transicion")
+            if "velocidad_animacion" in data and "animation_speed" not in data:
+                data["animation_speed"] = data.pop("velocidad_animacion")
+            if "tema" in data and "theme" not in data:
+                data["theme"] = data.pop("tema")
+            return data
     except (json.JSONDecodeError, IOError):
-        print("\033[91m⚠️ Error al leer config.json, usando valores predeterminados.\033[0m")
-        return {"transicion": DEFAULT_TRANSITION}
+        print("\033[91m⚠️ Error reading config.json, using defaults.\033[0m")
+        return {"transition": DEFAULT_TRANSITION}
 
 
 def guardar_config(config: dict) -> bool:
     """
-    Guarda la configuración en config.json
+    Save settings to config.json
     
     Args:
-        config: Diccionario con la configuración
+        config: Config dict
         
     Returns:
-        True si se guardó correctamente
+        True if saved successfully
     """
     try:
-        # Asegurar que el directorio existe
+        # Ensure directory exists
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
         return True
     except IOError:
-        print("\033[91m⚠️ No se pudo guardar la configuración.\033[0m")
+        print("\033[91m⚠️ Could not save settings.\033[0m")
         return False
 
 
 def obtener_transicion() -> str:
     """
-    Obtiene la transición seleccionada por el usuario
+    Get the user-selected transition
     
     Returns:
-        Nombre de la transición
+        Transition name
     """
-    return cargar_config().get("transicion", DEFAULT_TRANSITION)
+    cfg = cargar_config()
+    return cfg.get("transition", cfg.get("transicion", DEFAULT_TRANSITION))
 
 
 def cambiar_transicion(nueva_transicion: str):
     """
-    Cambia la transición y la guarda
+    Change and save the transition
     
     Args:
-        nueva_transicion: Nombre de la nueva transición
+        nueva_transicion: New transition name
     """
     config = cargar_config()
-    config["transicion"] = nueva_transicion
+    config["transition"] = nueva_transicion
+    config.pop("transicion", None)
     guardar_config(config)
 
 
@@ -260,13 +270,13 @@ def aplicar_transicion(texto: str, color_final: str = "\033[37m"):
 # EFECTOS ADICIONALES
 # ============================================================
 
-def barra_cargando(duracion: float = 2.0, mensaje: str = "Cargando"):
+def barra_cargando(duracion: float = 2.0, mensaje: str = "Loading"):
     """
-    Muestra una barra de carga animada
+    Show an animated loading bar
     
     Args:
-        duracion: Duración en segundos
-        mensaje: Mensaje a mostrar
+        duracion: Duration in seconds
+        mensaje: Message to show
     """
     ocultar_cursor()
     
@@ -282,19 +292,19 @@ def barra_cargando(duracion: float = 2.0, mensaje: str = "Cargando"):
         time.sleep(0.1)
         i += 1
     
-    sys.stdout.write(f"\r\033[92m✓ {mensaje} completado!\033[0m\n")
+    sys.stdout.write(f"\r\033[92m✓ {mensaje} done!\033[0m\n")
     sys.stdout.flush()
     
     mostrar_cursor()
 
 
-def puntos_suspensivos(mensaje: str = "Procesando", duracion: float = 2.0):
+def puntos_suspensivos(mensaje: str = "Processing", duracion: float = 2.0):
     """
-    Muestra puntos suspensivos animados
+    Show animated ellipsis
     
     Args:
-        mensaje: Mensaje base
-        duracion: Duración en segundos
+        mensaje: Base message
+        duracion: Duration in seconds
     """
     ocultar_cursor()
     
@@ -314,12 +324,24 @@ def puntos_suspensivos(mensaje: str = "Procesando", duracion: float = 2.0):
 
 
 # ============================================================
-# INICIALIZACIÓN
+# INIT
 # ============================================================
 
-# Asegurar que el directorio de assets existe
+# Ensure assets dir exists
 ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Crear config inicial si no existe
+# Create initial config if missing
 if not CONFIG_PATH.exists():
     cargar_config()
+
+
+# English aliases (new API)
+hide_cursor = ocultar_cursor
+show_cursor = mostrar_cursor
+load_config = cargar_config
+save_config = guardar_config
+get_transition = obtener_transicion
+set_transition = cambiar_transicion
+apply_transition = aplicar_transicion
+loading_bar = barra_cargando
+loading_dots = puntos_suspensivos
