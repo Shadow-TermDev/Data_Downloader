@@ -3,7 +3,7 @@
 Data Downloader - Multimedia toolkit for Termux
 Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Version: 1.7.0
+Version: 1.8.0
 """
 
 import sys
@@ -21,17 +21,26 @@ from config.settings import (
     WEBSITE, REPOSITORY, MESSAGES
 )
 
-# Utils (TokenHub/player-style UI)
+# Utils (TokenHub/player-style UI + navigable TUI)
 from src.utils.animations import ocultar_cursor, mostrar_cursor
 from src.utils.helpers import limpiar_pantalla, centrar_texto
-from src.utils.boxes import print_box, print_menu_box
-from src.utils.ui import print_header
+from src.utils.boxes import print_box
+from src.utils.tui import select_index
 
 # Core modules
 from src.core.menu import MenuHandler
 
 # Init colorama
 init(autoreset=True)
+
+MAIN_OPTIONS = [
+    "Download content",
+    "Convert files",
+    "Enhance file quality",
+    "Search YouTube",
+    "Help",
+    "Exit",
+]
 
 
 class DataDownloader:
@@ -41,16 +50,17 @@ class DataDownloader:
         self.menu_handler = MenuHandler()
 
     def show_banner(self):
-        """Show the main app banner (player-style header + pyfiglet)"""
+        """Show the main app banner (pyfiglet, no box)."""
         limpiar_pantalla()
-        print_header(PROJECT_NAME, VERSION)
 
         # Big title with pyfiglet
         titulo = pyfiglet.figlet_format("Downloader", font="slant")
         for linea in titulo.splitlines():
             print(Fore.YELLOW + centrar_texto(linea))
 
-        print(Fore.CYAN + centrar_texto("MUSIC, VIDEO & IMAGE DOWNLOADER\n"))
+        print(Fore.CYAN + centrar_texto("MUSIC, VIDEO & IMAGE DOWNLOADER"))
+        print(Fore.MAGENTA + centrar_texto(f"{VERSION}"))
+        print()
 
     def show_project_info(self):
         """Show project info in a box"""
@@ -74,56 +84,37 @@ class DataDownloader:
 
         print_box(titulo=f" {PROJECT_NAME} ", lineas=lineas, borde=Fore.MAGENTA,
                   color_titulo=Fore.YELLOW, colores=colores)
-
-    def show_main_menu(self):
-        """Show the main menu options"""
-        opciones = [
-            "1 - Download content",
-            "2 - Convert files",
-            "3 - Enhance file quality",
-            "4 - Search YouTube",
-            "5 - Help",
-            "6 - Exit",
-        ]
-        colores = [Fore.GREEN, Fore.BLUE, Fore.CYAN, Fore.MAGENTA, Fore.YELLOW, Fore.RED]
-
-        print_menu_box(opciones, colores)
         print()
-
-        mostrar_cursor()
-        print(Fore.CYAN + "  -> Enter option number: ", end="")
-
-    def farewell(self):
-        """Show goodbye message"""
-        print()
-        print(Fore.RED + centrar_texto(MESSAGES["goodbye"]))
-        print(Fore.CYAN + centrar_texto(f"{VERSION} - {AUTHOR}"))
-        print(Fore.MAGENTA + centrar_texto(f"🌐 {WEBSITE}"))
-        mostrar_cursor()
 
     def run(self):
-        """Main app loop"""
+        """Main app loop (navigable TUI)."""
         ocultar_cursor()
+
+        actions = [
+            self.menu_handler.download_menu,
+            self.menu_handler.converter_menu,
+            self.menu_handler.enhancer_menu,
+            self.menu_handler.search_menu,
+            self.menu_handler.help_menu,
+        ]
 
         try:
             while True:
                 self.show_banner()
                 self.show_project_info()
-                self.show_main_menu()
 
-                opcion = input().strip()
-                ocultar_cursor()
+                idx = select_index(
+                    "What do you want to do?",
+                    MAIN_OPTIONS,
+                    hint="↑/↓ navigate • Enter select • 1-6 quick pick • q exit",
+                )
 
-                if opcion == "6":
+                if idx is None or MAIN_OPTIONS[idx] == "Exit":
                     self.farewell()
                     break
 
                 try:
-                    # Delegate to the menu handler
-                    if not self.menu_handler.handle_option(opcion):
-                        from src.utils.helpers import pausar
-                        print(Fore.RED + centrar_texto(MESSAGES["invalid_option"]) + Style.RESET_ALL)
-                        pausar(mostrar=False)
+                    actions[idx]()
                 except Exception as e:
                     # Errors in one option must not kill the app
                     from src.utils.helpers import pausar
@@ -137,12 +128,26 @@ class DataDownloader:
         finally:
             mostrar_cursor()
 
-    # --- Backward-compat aliases (old Spanish API) ---
+    def farewell(self):
+        """Show goodbye message"""
+        print()
+        print(Fore.RED + centrar_texto(MESSAGES["goodbye"]))
+        print(Fore.CYAN + centrar_texto(f"{VERSION} - {AUTHOR}"))
+        print(Fore.MAGENTA + centrar_texto(f"🌐 {WEBSITE}"))
+        mostrar_cursor()
+
+    # --- Backward-compat aliases (old API) ---
     mostrar_banner = show_banner
     mostrar_info_proyecto = show_project_info
-    mostrar_menu_principal = show_main_menu
     despedida = farewell
     ejecutar = run
+
+    def show_main_menu(self):
+        """Deprecated: main loop now uses navigable TUI."""
+        idx = select_index("What do you want to do?", MAIN_OPTIONS)
+        return str(idx + 1) if idx is not None else "6"
+
+    mostrar_menu_principal = show_main_menu
 
 
 def main():

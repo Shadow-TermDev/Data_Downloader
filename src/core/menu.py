@@ -1,5 +1,5 @@
 """
-Menu and navigation handler
+Menu and navigation handler (navigable arrow-key TUI)
 Author: Shadow-TermDev
 """
 
@@ -8,7 +8,7 @@ from typing import Callable, Dict
 
 from src.utils.helpers import limpiar_pantalla, centrar_texto
 from src.utils.animations import ocultar_cursor, mostrar_cursor
-from src.utils.boxes import print_menu_box
+from src.utils.tui import select_index
 from config.settings import MESSAGES
 
 
@@ -26,7 +26,7 @@ class MenuHandler:
 
     def handle_option(self, opcion: str) -> bool:
         """
-        Handle the selected main-menu option
+        Handle the selected main-menu option (numeric string, legacy API).
 
         Args:
             opcion: Selected option number
@@ -64,7 +64,11 @@ class MenuHandler:
         print()
         print(Fore.CYAN + f"{iconos[tipo]} {mensajes[tipo]}: " + Style.RESET_ALL, end="")
 
-        url = input().strip()
+        mostrar_cursor()
+        try:
+            url = input().strip()
+        finally:
+            ocultar_cursor()
 
         if not url:
             print(Fore.RED + f"❌ {MESSAGES['empty_input']}")
@@ -76,60 +80,58 @@ class MenuHandler:
 
         return url
 
+    def _pick(self, titulo: str, subtitulo: str, opciones: list) -> int | None:
+        """Render header + navigable list. Returns index or None (back/cancel)."""
+        import pyfiglet
+
+        limpiar_pantalla()
+        figlet = pyfiglet.Figlet(font="slant")
+        for linea in figlet.renderText(titulo).splitlines():
+            print(Fore.YELLOW + centrar_texto(linea))
+        print(Fore.CYAN + centrar_texto(f"{subtitulo}\n"))
+        return select_index(subtitulo, opciones)
+
     def download_menu(self):
         """Content download menu"""
         from src.downloader.video import descargar_video
         from src.downloader.audio import descargar_audio
         from src.downloader.image import descargar_imagen
 
+        opciones = [
+            "Download video",
+            "Download audio",
+            "Download image",
+            "Search YouTube & download",
+            "Back to main menu",
+        ]
+
         while True:
-            self._show_submenu(
-                titulo="Downloader",
-                subtitulo="DOWNLOAD MEDIA FILES",
-                opciones=[
-                    "1 - Download video",
-                    "2 - Download audio",
-                    "3 - Download image",
-                    "4 - Search YouTube & download",
-                    "5 - Back to main menu",
-                ]
-            )
-
-            opcion = input().strip()
-            ocultar_cursor()
-
-            if opcion == "5":
+            idx = self._pick("Downloader", "DOWNLOAD MEDIA FILES", opciones)
+            if idx is None or idx == 4:
                 return
 
-            if opcion not in ["1", "2", "3", "4"]:
-                self._show_error()
-                continue
-
-            if opcion == "4":
+            if idx == 3:
                 url = self._search_youtube_url()
                 if not url:
                     continue
                 # Ask video or audio after search
                 tipo = self._ask_search_media_type()
-                if tipo == "audio":
-                    try:
+                try:
+                    if tipo == "audio":
                         descargar_audio(url)
-                    except Exception as e:
-                        print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
-                else:
-                    try:
+                    else:
                         descargar_video(url)
-                    except Exception as e:
-                        print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
+                except Exception as e:
+                    print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
                 continue
 
             funciones = {
-                "1": ("video", descargar_video),
-                "2": ("audio", descargar_audio),
-                "3": ("image", descargar_imagen),
+                0: ("video", descargar_video),
+                1: ("audio", descargar_audio),
+                2: ("image", descargar_imagen),
             }
 
-            tipo, funcion = funciones[opcion]
+            tipo, funcion = funciones[idx]
             url = self._get_url(tipo)
 
             if not url:
@@ -148,42 +150,34 @@ class MenuHandler:
         from src.converter.audio import convertir_audio
         from src.core.file_manager import buscar_archivo
 
+        opciones = [
+            "Convert video",
+            "Video → Audio",
+            "Convert image",
+            "Convert audio",
+            "Back to main menu",
+        ]
+
         while True:
-            self._show_submenu(
-                titulo="Converter",
-                subtitulo="VIDEO, AUDIO & IMAGE CONVERTER",
-                opciones=[
-                    "1 - Convert video",
-                    "2 - Video → Audio",
-                    "3 - Convert image",
-                    "4 - Convert audio",
-                    "5 - Back to main menu",
-                ]
-            )
-
-            opcion = input().strip()
-            ocultar_cursor()
-
-            if opcion == "5":
+            idx = self._pick("Converter", "VIDEO, AUDIO & IMAGE CONVERTER", opciones)
+            if idx is None or idx == 4:
                 return
 
-            if opcion not in ["1", "2", "3", "4"]:
-                self._show_error()
-                continue
-
             configs = {
-                "1": ("Enter video name: ", convertir_video, ["mp4", "mkv", "avi", "mov", "webm"]),
-                "2": ("Enter video name: ", convertir_video_a_audio, ["mp3", "wav", "ogg", "aac", "flac"]),
-                "3": ("Enter image name: ", convertir_imagen, ["png", "jpg", "jpeg", "webp", "bmp"]),
-                "4": ("Enter audio name: ", convertir_audio, ["mp3", "wav", "ogg", "aac", "flac"]),
+                0: ("Enter video name: ", convertir_video, ["mp4", "mkv", "avi", "mov", "webm"]),
+                1: ("Enter video name: ", convertir_video_a_audio, ["mp3", "wav", "ogg", "aac", "flac"]),
+                2: ("Enter image name: ", convertir_imagen, ["png", "jpg", "jpeg", "webp", "bmp"]),
+                3: ("Enter audio name: ", convertir_audio, ["mp3", "wav", "ogg", "aac", "flac"]),
             }
 
-            mensaje, funcion, formatos = configs[opcion]
+            mensaje, funcion, formatos = configs[idx]
 
             mostrar_cursor()
             print()
-            nombre = input(Fore.YELLOW + mensaje).strip()
-            ocultar_cursor()
+            try:
+                nombre = input(Fore.YELLOW + mensaje).strip()
+            finally:
+                ocultar_cursor()
 
             if not nombre:
                 print(Fore.RED + centrar_texto(MESSAGES["empty_input"]) + Style.RESET_ALL)
@@ -196,8 +190,10 @@ class MenuHandler:
 
             while True:
                 mostrar_cursor()
-                fmt = input(Fore.CYAN + f"Output format ({', '.join(formatos)}): " + Style.RESET_ALL).strip().lower()
-                ocultar_cursor()
+                try:
+                    fmt = input(Fore.CYAN + f"Output format ({', '.join(formatos)}): " + Style.RESET_ALL).strip().lower()
+                finally:
+                    ocultar_cursor()
 
                 if fmt in formatos:
                     try:
@@ -216,44 +212,36 @@ class MenuHandler:
         from src.enhancer.image import mejorar_calidad_imagen
         from src.core.file_manager import buscar_archivo
 
+        opciones = [
+            "Enhance video quality",
+            "Enhance audio quality",
+            "Enhance image quality",
+            "Back to main menu",
+        ]
+
         while True:
-            self._show_submenu(
-                titulo="Quality Boost",
-                subtitulo="IMPROVE IMAGE, VIDEO & AUDIO QUALITY",
-                opciones=[
-                    "1 - Enhance video quality",
-                    "2 - Enhance audio quality",
-                    "3 - Enhance image quality",
-                    "4 - Back to main menu",
-                ]
-            )
-
-            opcion = input().strip()
-            ocultar_cursor()
-
-            if opcion == "4":
+            idx = self._pick("Quality Boost", "IMPROVE IMAGE, VIDEO & AUDIO QUALITY", opciones)
+            if idx is None or idx == 3:
                 return
 
-            if opcion not in ["1", "2", "3"]:
-                self._show_error()
-                continue
-
             mensajes = {
-                "1": "Enter video name: ",
-                "2": "Enter audio name: ",
-                "3": "Enter image name: ",
+                0: "Enter video name: ",
+                1: "Enter audio name: ",
+                2: "Enter image name: ",
             }
 
             funciones = {
-                "1": mejorar_calidad_video,
-                "2": mejorar_calidad_audio,
-                "3": mejorar_calidad_imagen,
+                0: mejorar_calidad_video,
+                1: mejorar_calidad_audio,
+                2: mejorar_calidad_imagen,
             }
 
             mostrar_cursor()
             print()
-            nombre = input(Fore.YELLOW + mensajes[opcion]).strip()
-            ocultar_cursor()
+            try:
+                nombre = input(Fore.YELLOW + mensajes[idx]).strip()
+            finally:
+                ocultar_cursor()
 
             if not nombre:
                 print(Fore.RED + centrar_texto(MESSAGES["empty_input"]) + Style.RESET_ALL)
@@ -266,43 +254,33 @@ class MenuHandler:
                 continue
 
             try:
-                funciones[opcion](ruta)
+                funciones[idx](ruta)
             except Exception as e:
                 print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
                 # No pause, functions already do it
 
     def search_menu(self):
-        """Standalone YouTube search (prototype) -> download"""
+        """Standalone YouTube search -> download"""
         from src.downloader.video import descargar_video
         from src.downloader.audio import descargar_audio
 
+        opciones = [
+            "Search & download video",
+            "Search & download audio",
+            "Back to main menu",
+        ]
+
         while True:
-            self._show_submenu(
-                titulo="YT Search",
-                subtitulo="🔎 YOUTUBE SEARCH (PROTOTYPE)",
-                opciones=[
-                    "1 - Search & download video",
-                    "2 - Search & download audio",
-                    "3 - Back to main menu",
-                ]
-            )
-
-            opcion = input().strip()
-            ocultar_cursor()
-
-            if opcion == "3":
+            idx = self._pick("YT Search", "🔎 YOUTUBE SEARCH", opciones)
+            if idx is None or idx == 2:
                 return
-
-            if opcion not in ["1", "2"]:
-                self._show_error()
-                continue
 
             url = self._search_youtube_url()
             if not url:
                 continue
 
             try:
-                if opcion == "2":
+                if idx == 1:
                     descargar_audio(url)
                 else:
                     descargar_video(url)
@@ -310,7 +288,7 @@ class MenuHandler:
                 print(Fore.RED + centrar_texto(f"{MESSAGES['error_occurred']}: {e}") + Style.RESET_ALL)
 
     def _search_youtube_url(self) -> str:
-        """Run the search prototype and return a URL (or '')."""
+        """Run the search and return a URL (or '')."""
         from src.searcher.youtube import search_and_pick
         from src.utils.helpers import pausar
         url = search_and_pick()
@@ -320,80 +298,42 @@ class MenuHandler:
         return url
 
     def _ask_search_media_type(self) -> str:
-        """Ask whether the searched URL is video or audio."""
-        mostrar_cursor()
-        print()
-        sel = input(Fore.YELLOW + "Download as video or audio? [V/a]: " + Style.RESET_ALL).strip().lower()
-        ocultar_cursor()
-        return "audio" if sel in ("a", "audio") else "video"
+        """Ask whether the searched URL is video or audio (navigable)."""
+        idx = select_index(
+            "Download as?",
+            ["Video", "Audio"],
+            hint="↑/↓ navigate • Enter select • q = video",
+        )
+        return "audio" if idx == 1 else "video"
 
     def help_menu(self):
         """Help menu"""
         from src.utils.helpers import mostrar_ayuda
 
+        opciones = [
+            "How to download content",
+            "How to convert files",
+            "How to enhance quality",
+            "How to search YouTube",
+            "Back to main menu",
+        ]
+
         while True:
-            self._show_submenu(
-                titulo="Help",
-                subtitulo="📖 USER MANUAL 📖",
-                opciones=[
-                    "1 - How to download content",
-                    "2 - How to convert files",
-                    "3 - How to enhance quality",
-                    "4 - Back to main menu",
-                ],
-                color_opciones=Fore.GREEN
-            )
-
-            opcion = input().strip()
-            ocultar_cursor()
-
-            if opcion == "4":
+            idx = self._pick("Help", "📖 USER MANUAL 📖", opciones)
+            if idx is None or idx == 4:
                 return
 
-            if opcion in ["1", "2", "3"]:
-                mostrar_ayuda(opcion)
-            else:
-                self._show_error()
+            mostrar_ayuda(str(idx + 1))
 
     def _show_submenu(self, titulo: str, subtitulo: str, opciones: list, color_opciones=None):
-        """
-        Show a generic submenu (TokenHub-style clear + player-style prompt)
-
-        Args:
-            titulo: Main menu title
-            subtitulo: Descriptive subtitle
-            opciones: Menu option list
-            color_opciones: Default color for options
-        """
-        limpiar_pantalla()
-
-        from src.utils.ui import print_header
-        from config.settings import VERSION
-        print_header("Data Downloader", VERSION)
-
+        """Deprecated: submenus now use navigable _pick(). Kept for compat."""
         import pyfiglet
-        figlet = pyfiglet.Figlet(font="slant")
-        titulo_ascii = figlet.renderText(titulo)
 
-        for linea in titulo_ascii.splitlines():
+        limpiar_pantalla()
+        figlet = pyfiglet.Figlet(font="slant")
+        for linea in figlet.renderText(titulo).splitlines():
             print(Fore.YELLOW + centrar_texto(linea))
         print(Fore.CYAN + centrar_texto(f"{subtitulo}\n"))
-
-        colores = []
-        for i, texto in enumerate(opciones):
-            # Last option always red
-            if i == len(opciones) - 1:
-                colores.append(Fore.RED)
-            elif color_opciones:
-                colores.append(color_opciones)
-            else:
-                colores.append(Fore.GREEN)
-
-        print_menu_box(opciones, colores)
-        print()
-
-        mostrar_cursor()
-        print(Fore.CYAN + "  -> Enter option number: ", end="")
 
     def _show_error(self):
         """Show invalid-option error"""

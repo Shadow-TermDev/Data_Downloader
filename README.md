@@ -7,7 +7,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.7.0-success.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.8.0-success.svg?style=for-the-badge)
 
 **Download, enhance and convert videos, audios and images — ALL from your phone.**
 
@@ -24,8 +24,8 @@
 - ✅ No watermarks
 - ✅ Metadata and covers included
 - ✅ PO Token support (anti-bot)
-- ✅ Clean, improved interface (TokenHub/player-style header)
-- ✅ 🔎 YouTube search prototype (search & download without leaving the app)
+- ✅ Clean, improved interface with navigable arrow-key TUI (no extra dependencies)
+- ✅ 🔎 YouTube search (search & download without leaving the app)
 
 ### 🔄 Converter
 - ✅ **Video:** MP4, MKV, AVI, MOV, WebM
@@ -86,7 +86,7 @@
 
 ## 📖 Usage
 
-Once the app is running, you can download audios and videos with the matching link. Follow the on-screen instructions to pick format and quality. You can also press **4 - Search YouTube** to search first (prototype, top 8 results) and download straight away.
+Once the app is running, navigate with ↑/↓ + Enter (or 1-6 quick pick, q to go back). You can download audios and videos with the matching link, or press **Search YouTube** to search first and download straight away.
 
 ### 📥 Output directories
 

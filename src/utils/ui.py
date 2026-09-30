@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Shared UI helpers — inspired by TokenHub (rich Panel + robust clear)
+Shared UI helpers — inspired by TokenHub (robust clear)
 and the `player` bash script (~/.local/bin/player).
 
 Style guide:
   - Always clear with clear_screen() (scrollback-safe, like TokenHub).
-  - Print the app header with print_header() (player-style box).
-  - Menus are numbered lists with a "▶" prompt (player-style).
+  - Navigate with src.utils.tui.select_index() (arrow keys, fzf-like).
   - Pause with pause() ("Press Enter to continue...").
 
 Author: Shadow-TermDev
@@ -19,9 +18,6 @@ import sys
 from colorama import Fore, Style
 
 APP_NAME = "Data Downloader"
-
-# Player-style box width (number of ─)
-HEADER_WIDTH = 42
 
 
 def clear_screen() -> None:
@@ -47,23 +43,8 @@ def clear_screen() -> None:
 
 
 def print_header(app_name: str = APP_NAME, version: str = "") -> None:
-    """Player-style header box:
-
-    ╔══════════════════════════════════════════╗
-    ║   Data Downloader v1.7.0                 ║
-    ╚══════════════════════════════════════════╝
-    """
-    bar = "═" * HEADER_WIDTH
-    title = f"{app_name} {version}".strip()
-    # Pad/truncate to fit inside the box
-    inner = f"  {title}  "
-    if len(inner) > HEADER_WIDTH:
-        inner = inner[:HEADER_WIDTH]
-    inner = inner.ljust(HEADER_WIDTH)
-    print(Fore.CYAN + f"╔{bar}╗")
-    print(Fore.CYAN + "║" + Fore.YELLOW + inner + Fore.CYAN + "║")
-    print(Fore.CYAN + f"╚{bar}╝" + Style.RESET_ALL)
-    print()
+    """Deprecated no-op (header box removed). Kept for backward compat."""
+    return None
 
 
 def print_status_line(text: str) -> None:
