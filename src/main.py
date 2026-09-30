@@ -3,7 +3,7 @@
 Data Downloader - Multimedia toolkit for Termux
 Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Version: 1.8.1
+Version: 1.8.2
 """
 
 import sys
@@ -34,12 +34,12 @@ from src.core.menu import MenuHandler
 init(autoreset=True)
 
 MAIN_OPTIONS = [
-    "📥 Download content",
-    "🔄 Convert files",
-    "✨ Enhance file quality",
-    "🔎 Search YouTube",
-    "📖 Help",
-    "🚪 Exit",
+    "Download content",
+    "Convert files",
+    "Enhance file quality",
+    "Search YouTube",
+    "Help",
+    "Exit",
 ]
 
 

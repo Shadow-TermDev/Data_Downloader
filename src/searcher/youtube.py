@@ -119,10 +119,10 @@ def pick_result(results: List[Dict], query: str = "") -> Dict | None:
     from src.utils.tui import select_index
 
     def _header():
-        print_info_box(f"🔎 YOUTUBE SEARCH{(': ' + query[:30]) if query else ''}")
+        print_info_box(f"YOUTUBE SEARCH{(': ' + query[:30]) if query else ''}")
 
     options = [
-        f"🎬 {r['title'][:55]}\n⏱ {format_duration(r['duration'])}  │  👤 {r['uploader']}"
+        f"{r['title'][:55]}\n{format_duration(r['duration'])}  |  {r['uploader']}"
         for r in results
     ]
     idx = select_index(
@@ -146,9 +146,9 @@ def search_and_pick() -> str:
     """
     ocultar_cursor()
     try:
-        print_info_box("🔎 YOUTUBE SEARCH")
+        print_info_box("YOUTUBE SEARCH")
         mostrar_cursor()
-        query = input(Fore.YELLOW + "\n🔎 Search YouTube: " + Style.RESET_ALL).strip()
+        query = input(Fore.YELLOW + "\nSearch YouTube: " + Style.RESET_ALL).strip()
         ocultar_cursor()
         if not query:
             print(Fore.RED + "❌ Empty query.")

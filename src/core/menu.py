@@ -55,14 +55,8 @@ class MenuHandler:
             "image": "Enter the image URL",
         }
 
-        iconos = {
-            "video": "🎬",
-            "audio": "🎵",
-            "image": "🖼️",
-        }
-
         print()
-        print(Fore.CYAN + f"{iconos[tipo]} {mensajes[tipo]}: " + Style.RESET_ALL, end="")
+        print(Fore.CYAN + f"{mensajes[tipo]}: " + Style.RESET_ALL, end="")
 
         mostrar_cursor()
         try:
@@ -101,11 +95,11 @@ class MenuHandler:
         from src.downloader.image import descargar_imagen
 
         opciones = [
-            "🎬 Download video",
-            "🎵 Download audio",
-            "🖼️ Download image",
-            "🔎 Search YouTube & download",
-            "↩ Back to main menu",
+            "Download video",
+            "Download audio",
+            "Download image",
+            "Search YouTube & download",
+            "Back to main menu",
         ]
 
         while True:
@@ -154,11 +148,11 @@ class MenuHandler:
         from src.core.file_manager import buscar_archivo
 
         opciones = [
-            "🎬 Convert video",
-            "🎵 Video → Audio",
-            "🖼️ Convert image",
-            "🎧 Convert audio",
-            "↩ Back to main menu",
+            "Convert video",
+            "Video -> Audio",
+            "Convert image",
+            "Convert audio",
+            "Back to main menu",
         ]
 
         while True:
@@ -216,10 +210,10 @@ class MenuHandler:
         from src.core.file_manager import buscar_archivo
 
         opciones = [
-            "🎬 Enhance video quality",
-            "🎧 Enhance audio quality",
-            "🖼️ Enhance image quality",
-            "↩ Back to main menu",
+            "Enhance video quality",
+            "Enhance audio quality",
+            "Enhance image quality",
+            "Back to main menu",
         ]
 
         while True:
@@ -268,13 +262,13 @@ class MenuHandler:
         from src.downloader.audio import descargar_audio
 
         opciones = [
-            "🎬 Search & download video",
-            "🎵 Search & download audio",
-            "↩ Back to main menu",
+            "Search & download video",
+            "Search & download audio",
+            "Back to main menu",
         ]
 
         while True:
-            idx = self._pick("YT Search", "🔎 YOUTUBE SEARCH", opciones)
+            idx = self._pick("YT Search", "YOUTUBE SEARCH", opciones)
             if idx is None or idx == 2:
                 return
 
@@ -304,8 +298,8 @@ class MenuHandler:
         """Ask whether the searched URL is video or audio (navigable)."""
         idx = select_index(
             "Download as?",
-            ["🎬 Video", "🎵 Audio"],
-            hint="↑/↓ navigate • Enter select • q = video",
+            ["Video", "Audio"],
+            hint="up/down navigate • Enter select • q = video",
         )
         return "audio" if idx == 1 else "video"
 
@@ -314,15 +308,15 @@ class MenuHandler:
         from src.utils.helpers import mostrar_ayuda
 
         opciones = [
-            "📥 How to download content",
-            "🔄 How to convert files",
-            "✨ How to enhance quality",
-            "🔎 How to search YouTube",
-            "↩ Back to main menu",
+            "How to download content",
+            "How to convert files",
+            "How to enhance quality",
+            "How to search YouTube",
+            "Back to main menu",
         ]
 
         while True:
-            idx = self._pick("Help", "📖 USER MANUAL 📖", opciones)
+            idx = self._pick("Help", "USER MANUAL", opciones)
             if idx is None or idx == 4:
                 return
 

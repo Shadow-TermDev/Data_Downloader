@@ -194,7 +194,7 @@ def mostrar_ayuda(opcion: str):
     for linea in titulo_ascii.splitlines():
         print(Fore.YELLOW + centrar_texto(linea))
     
-    print(Fore.CYAN + centrar_texto("📖 USER MANUAL 📖\n"))
+    print(Fore.CYAN + centrar_texto("USER MANUAL\n"))
     print(Fore.MAGENTA + "═" * 80)
     
     # Message

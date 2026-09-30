@@ -15,7 +15,7 @@ Usage:
 
     idx = select_index(
         "What would you like to do?",
-        ["📥 Download content", "🔄 Convert files", "🚪 Exit"],
+        ["Download content", "Convert files", "Exit"],
         header_fn=lambda: print("BANNER..."),
     )
     # idx -> int | None (None = cancelled with q/Esc)
@@ -44,7 +44,15 @@ def _is_tty() -> bool:
 
 
 def _read_key_unix():
-    """Read one key (incl. arrows) on Unix. Returns: up/down/enter/esc/q/char."""
+    """Read one key (incl. arrows) on Unix. Returns: up/down/enter/esc/q/char.
+
+    NOTE: reads with os.read() on the raw fd, NOT sys.stdin.read().
+    sys.stdin is a buffered TextIOWrapper: read(1) slurps the whole
+    escape sequence (ESC [ A) into its internal buffer, so a later
+    select() on the fd sees nothing and arrows were misread as Esc
+    (which cancelled the menu). os.read() bypasses that buffer.
+    """
+    import os
     import select
     import termios
     import tty
@@ -55,10 +63,17 @@ def _read_key_unix():
         tty.setraw(fd)
 
         def _read(timeout=None):
-            if timeout is None:
-                return sys.stdin.read(1)
-            r, _, _ = select.select([sys.stdin], [], [], timeout)
-            return sys.stdin.read(1) if r else ""
+            if timeout is not None:
+                r, _, _ = select.select([fd], [], [], timeout)
+                if not r:
+                    return ""
+            try:
+                data = os.read(fd, 1)
+            except OSError:
+                return ""
+            if not data:
+                return ""
+            return data.decode("utf-8", errors="ignore")
 
         ch = _read()
         if ch == "\x03":  # Ctrl+C
