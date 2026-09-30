@@ -3,7 +3,7 @@
 Data Downloader - Multimedia toolkit for Termux
 Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Version: 1.8.2
+Version: 1.8.3
 """
 
 import sys

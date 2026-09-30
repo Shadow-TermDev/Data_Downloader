@@ -7,7 +7,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)
 ![Termux](https://img.shields.io/badge/Termux-Android-green.svg?style=for-the-badge&logo=android)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.8.2-success.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.8.3-success.svg?style=for-the-badge)
 
 **Download, enhance and convert videos, audios and images — ALL from your phone.**
 

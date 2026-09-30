@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """
 Zero-dependency navigable TUI in the style of TokenHub
-(InquirerPy: green `?` prompt + `❯` pointer) and `player`
-(full redraw on every key, like menu_clasico).
+(InquirerPy: green `?` prompt + `❯` pointer).
 
-Why full redraw instead of cursor-up re-render?
-  - Pinch-zoom / font-size changes alter terminal columns mid-session.
-  - Long lines + emoji wrap to extra rows, so "move cursor up N lines"
-    math drifts and leaves garbage on screen.
-  - Clearing and repainting (player pattern) is immune to all of that.
+Flicker-free by design:
+  - ONE full clear when the menu opens (banner + list painted once).
+  - Arrow keys only repaint the option block IN PLACE: the cursor
+    moves up exactly the block's row count and the block is
+    reprinted with `ESC[K` (clear-to-end-of-line) per row.
+  - No `clear` per keypress (that fork + full repaint was the blink).
+  - Every printed line is truncated to the terminal width, so a
+    logical line is ALWAYS exactly one physical row — the row math
+    can't drift, even with wide chars or pinch-zoom.
+  - If the terminal is resized mid-navigation, we resync once
+    (full clear + header + block) and keep going.
 
 Usage:
     from src.utils.tui import select_index
@@ -21,13 +26,14 @@ Usage:
     # idx -> int | None (None = cancelled with q/Esc)
 
 Controls:
-    ↑/k  move up        ↓/j  move down
+    up/k  move up        down/j  move down
     Enter select         q/Esc cancel
     1-9  quick pick      Ctrl+C cancel
 
 Non-TTY fallback: numbered input prompt.
 """
 
+import shutil
 import sys
 
 from colorama import Fore, Style
@@ -138,72 +144,118 @@ def _read_key():
     return _read_key_unix()
 
 
-def _draw(title: str, options: list, selected: int, hint: str,
-          header_fn=None) -> None:
-    """Full repaint: optional header, InquirerPy-style prompt, options, hint."""
-    from src.utils.animations import ocultar_cursor
-    from src.utils.helpers import limpiar_pantalla
+# ---------------------------------------------------------------
+# Width-aware, wrap-free rendering (one logical line == one row)
+# ---------------------------------------------------------------
 
-    limpiar_pantalla()
+def _term_cols(default: int = 80) -> int:
+    try:
+        return max(20, shutil.get_terminal_size().columns)
+    except Exception:
+        return default
+
+
+def _char_w(ch: str) -> int:
+    try:
+        from wcwidth import wcwidth
+        w = wcwidth(ch)
+        return w if w and w > 0 else 0
+    except Exception:
+        import unicodedata
+        return 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+
+
+def _vwidth(text: str) -> int:
+    return sum(_char_w(c) for c in text)
+
+
+def _truncate(text: str, max_w: int) -> str:
+    """Cut plain text to max_w columns (ellipsis if cut)."""
+    if _vwidth(text) <= max_w:
+        return text
+    out, w = [], 0
+    for ch in text:
+        cw = _char_w(ch)
+        if w + cw > max_w - 1:  # reserve 1 col for "…"
+            break
+        out.append(ch)
+        w += cw
+    return "".join(out) + "…"
+
+
+def _ansi_clear() -> None:
+    """Single full clear (ANSI only, no fork) for menu open / resync."""
+    sys.stdout.write("\033[2J\033[3J\033[H")
+    sys.stdout.flush()
+
+
+def _block_rows(title: str, options: list, hint: str) -> int:
+    """Row count of the managed block (all lines wrap-free, so exact)."""
+    rows = 1 + 1  # question line + blank
+    for opt in options:
+        rows += 1 + str(opt).count("\n")
+    rows += 1  # blank
+    if hint:
+        rows += 1
+    return rows
+
+
+def _print_block(title: str, options: list, selected: int,
+                 hint: str, cols: int) -> int:
+    """Print the managed block; every line fits cols (no wrap)."""
+    from src.utils.animations import ocultar_cursor
     ocultar_cursor()
 
-    if header_fn is not None:
-        try:
-            header_fn()
-        except Exception:
-            pass
+    def _line(color: str, plain: str):
+        sys.stdout.write(color + _truncate(plain, cols) + Style.RESET_ALL + "\033[K\n")
 
-    # TokenHub/InquirerPy-style question line
-    print(
-        Fore.GREEN + Style.BRIGHT + f"{PROMPT_SYMBOL} "
-        + Style.RESET_ALL + Fore.WHITE + Style.BRIGHT + title
-        + Style.RESET_ALL
-    )
-    print()
-
+    # InquirerPy-style question (two-tone, width-safe)
+    sys.stdout.write(Fore.GREEN + Style.BRIGHT + f"{PROMPT_SYMBOL} " + Style.RESET_ALL)
+    _line(Fore.WHITE + Style.BRIGHT, title)
+    _line("", "")
     for i, opt in enumerate(options):
-        first, *rest = str(opt).split("\n")
-        number = f"{i + 1}."
+        parts = str(opt).split("\n")
+        marker = f"{POINTER} {i + 1}." if i == selected else f"  {i + 1}."
         if i == selected:
-            print(
-                Fore.CYAN + Style.BRIGHT + f"{POINTER} {number} {first}"
-                + Style.RESET_ALL
-            )
-            for cont in rest:
-                print(Fore.CYAN + f"    {cont}" + Style.RESET_ALL)
+            _line(Fore.CYAN + Style.BRIGHT, f"{marker} {parts[0]}")
+            for cont in parts[1:]:
+                _line(Fore.CYAN, f"     {cont}")
         else:
-            print(Fore.WHITE + f"  {number} {first}" + Style.RESET_ALL)
-            for cont in rest:
-                print(Fore.LIGHTBLACK_EX + f"    {cont}" + Style.RESET_ALL)
-    print()
+            _line(Fore.WHITE, f"{marker} {parts[0]}")
+            for cont in parts[1:]:
+                _line(Fore.LIGHTBLACK_EX, f"     {cont}")
+    _line("", "")
     if hint:
-        print(Fore.LIGHTBLACK_EX + hint + Style.RESET_ALL)
+        _line(Fore.LIGHTBLACK_EX, hint)
+    sys.stdout.flush()
+    return _block_rows(title, options, hint)
 
 
 def select_index(title: str, options: list, initial: int = 0,
                  header_fn=None, hint: str = None) -> int | None:
-    """Interactive arrow-key picker (TokenHub-style).
+    """Interactive arrow-key picker (TokenHub-style, flicker-free).
 
     Args:
         title: Question shown InquirerPy-style (`? title`).
         options: Display strings (may contain newlines for subtitles).
         initial: Initially highlighted index.
-        header_fn: Optional callable repainted above the list (banner, etc).
+        header_fn: Optional callable painted once above the list
+            (banner, etc). Repainted only on resize resync.
         hint: Footer hint (default mentions arrows/Enter/quick-pick).
 
     Returns:
         Selected index or None if cancelled.
     """
-    from src.utils.animations import mostrar_cursor
+    from src.utils.animations import mostrar_cursor, ocultar_cursor
 
     if not options:
         return None
 
     if hint is None:
         if len(options) <= 9:
-            hint = "↑/↓ navigate • Enter select • 1-{} jump • q back".format(len(options))
+            hint = "up/down navigate • Enter select • 1-{} jump • q back".format(len(options))
         else:
-            hint = "↑/↓ navigate • Enter select • q back"
+            hint = "up/down navigate • Enter select • q back"
 
     # Non-interactive fallback: numbered prompt
     if not _is_tty():
@@ -213,7 +265,6 @@ def select_index(title: str, options: list, initial: int = 0,
         try:
             sel = input(Fore.CYAN + f"  -> Pick [1-{len(options)}] (q=cancel): " + Style.RESET_ALL).strip()
         finally:
-            from src.utils.animations import ocultar_cursor
             ocultar_cursor()
         if sel.lower() in ("q", "quit", "cancel", "back", ""):
             return None
@@ -222,8 +273,16 @@ def select_index(title: str, options: list, initial: int = 0,
         return None
 
     selected = max(0, min(initial, len(options) - 1))
+    ocultar_cursor()
     try:
-        _draw(title, options, selected, hint, header_fn)
+        cols = _term_cols()
+        _ansi_clear()
+        if header_fn is not None:
+            try:
+                header_fn()
+            except Exception:
+                pass
+        rows = _print_block(title, options, selected, hint, cols)
         while True:
             try:
                 key = _read_key()
@@ -244,6 +303,20 @@ def select_index(title: str, options: list, initial: int = 0,
                 continue
             else:
                 continue
-            _draw(title, options, selected, hint, header_fn)
+            new_cols = _term_cols()
+            if new_cols != cols:
+                # Resize/zoom mid-navigation: resync layout once.
+                cols = new_cols
+                _ansi_clear()
+                if header_fn is not None:
+                    try:
+                        header_fn()
+                    except Exception:
+                        pass
+                rows = _print_block(title, options, selected, hint, cols)
+            else:
+                sys.stdout.write(f"\033[{rows}A")
+                rows = _print_block(title, options, selected, hint, cols)
     finally:
         mostrar_cursor()
+        print()

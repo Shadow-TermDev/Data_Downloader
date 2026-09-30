@@ -11,7 +11,7 @@ from pathlib import Path
 # ============================================================
 
 PROJECT_NAME = "Data Downloader"
-VERSION = "v1.8.2"
+VERSION = "v1.8.3"
 AUTHOR = "Shadow-TermDev"
 AUTHOR_TITLE = "The Termux Lord"
 WEBSITE = "Shadow-TermDev.github.io"
