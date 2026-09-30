@@ -110,7 +110,7 @@ def format_duration(seconds: int) -> str:
         return "--:--"
 
 
-def pick_result(results: List[Dict]) -> Dict | None:
+def pick_result(results: List[Dict], query: str = "") -> Dict | None:
     """Show results in a navigable arrow-key list, return chosen dict or None."""
     if not results:
         print_error_box("❌ NO RESULTS", ["No videos found. Try another query."])
@@ -118,14 +118,18 @@ def pick_result(results: List[Dict]) -> Dict | None:
 
     from src.utils.tui import select_index
 
+    def _header():
+        print_info_box(f"🔎 YOUTUBE SEARCH{(': ' + query[:30]) if query else ''}")
+
     options = [
-        f"{r['title'][:55]}\n   ⏱ {format_duration(r['duration'])}  │  👤 {r['uploader']}"
+        f"🎬 {r['title'][:55]}\n⏱ {format_duration(r['duration'])}  │  👤 {r['uploader']}"
         for r in results
     ]
     idx = select_index(
-        f"🔎 {len(results)} results — pick a video",
+        f"{len(results)} results — pick a video to download",
         options,
-        hint="↑/↓ navigate • Enter download • 1-9 quick pick • q cancel",
+        header_fn=_header,
+        hint="↑/↓ navigate • Enter download • 1-8 jump • q cancel",
     )
     if idx is None:
         return None
@@ -151,7 +155,7 @@ def search_and_pick() -> str:
             return ""
         print(Fore.CYAN + f"\n⏳ Searching for '{query[:40]}'...")
         results = search_youtube(query, limit=8)
-        chosen = pick_result(results)
+        chosen = pick_result(results, query=query)
         return chosen["url"] if chosen else ""
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\n⚠️  Search cancelled")

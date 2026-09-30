@@ -3,7 +3,7 @@
 Data Downloader - Multimedia toolkit for Termux
 Author: Shadow-TermDev
 Web: https://Shadow-TermDev.github.io
-Version: 1.8.0
+Version: 1.8.1
 """
 
 import sys
@@ -34,12 +34,12 @@ from src.core.menu import MenuHandler
 init(autoreset=True)
 
 MAIN_OPTIONS = [
-    "Download content",
-    "Convert files",
-    "Enhance file quality",
-    "Search YouTube",
-    "Help",
-    "Exit",
+    "📥 Download content",
+    "🔄 Convert files",
+    "✨ Enhance file quality",
+    "🔎 Search YouTube",
+    "📖 Help",
+    "🚪 Exit",
 ]
 
 
@@ -100,16 +100,14 @@ class DataDownloader:
 
         try:
             while True:
-                self.show_banner()
-                self.show_project_info()
-
                 idx = select_index(
-                    "What do you want to do?",
+                    "What would you like to do?",
                     MAIN_OPTIONS,
-                    hint="↑/↓ navigate • Enter select • 1-6 quick pick • q exit",
+                    header_fn=self._header,
+                    hint="↑/↓ navigate • Enter select • 1-6 jump • q exit",
                 )
 
-                if idx is None or MAIN_OPTIONS[idx] == "Exit":
+                if idx is None or "Exit" in MAIN_OPTIONS[idx]:
                     self.farewell()
                     break
 
@@ -128,6 +126,11 @@ class DataDownloader:
         finally:
             mostrar_cursor()
 
+    def _header(self):
+        """Repainted above the TUI list on every keypress (zoom-proof)."""
+        self.show_banner()
+        self.show_project_info()
+
     def farewell(self):
         """Show goodbye message"""
         print()
@@ -144,7 +147,8 @@ class DataDownloader:
 
     def show_main_menu(self):
         """Deprecated: main loop now uses navigable TUI."""
-        idx = select_index("What do you want to do?", MAIN_OPTIONS)
+        idx = select_index("What would you like to do?", MAIN_OPTIONS,
+                           header_fn=self._header)
         return str(idx + 1) if idx is not None else "6"
 
     mostrar_menu_principal = show_main_menu

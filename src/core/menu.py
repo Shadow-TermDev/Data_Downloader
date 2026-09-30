@@ -81,15 +81,18 @@ class MenuHandler:
         return url
 
     def _pick(self, titulo: str, subtitulo: str, opciones: list) -> int | None:
-        """Render header + navigable list. Returns index or None (back/cancel)."""
+        """Section header + navigable list. Returns index or None (back/cancel)."""
         import pyfiglet
 
-        limpiar_pantalla()
-        figlet = pyfiglet.Figlet(font="slant")
-        for linea in figlet.renderText(titulo).splitlines():
-            print(Fore.YELLOW + centrar_texto(linea))
-        print(Fore.CYAN + centrar_texto(f"{subtitulo}\n"))
-        return select_index(subtitulo, opciones)
+        def _header():
+            figlet = pyfiglet.Figlet(font="slant")
+            for linea in figlet.renderText(titulo).splitlines():
+                print(Fore.YELLOW + centrar_texto(linea))
+            print(Fore.CYAN + centrar_texto(subtitulo))
+            print(Fore.MAGENTA + centrar_texto("─" * 40))
+            print()
+
+        return select_index(f"{subtitulo} — pick one:", opciones, header_fn=_header)
 
     def download_menu(self):
         """Content download menu"""
@@ -98,11 +101,11 @@ class MenuHandler:
         from src.downloader.image import descargar_imagen
 
         opciones = [
-            "Download video",
-            "Download audio",
-            "Download image",
-            "Search YouTube & download",
-            "Back to main menu",
+            "🎬 Download video",
+            "🎵 Download audio",
+            "🖼️ Download image",
+            "🔎 Search YouTube & download",
+            "↩ Back to main menu",
         ]
 
         while True:
@@ -151,11 +154,11 @@ class MenuHandler:
         from src.core.file_manager import buscar_archivo
 
         opciones = [
-            "Convert video",
-            "Video → Audio",
-            "Convert image",
-            "Convert audio",
-            "Back to main menu",
+            "🎬 Convert video",
+            "🎵 Video → Audio",
+            "🖼️ Convert image",
+            "🎧 Convert audio",
+            "↩ Back to main menu",
         ]
 
         while True:
@@ -213,10 +216,10 @@ class MenuHandler:
         from src.core.file_manager import buscar_archivo
 
         opciones = [
-            "Enhance video quality",
-            "Enhance audio quality",
-            "Enhance image quality",
-            "Back to main menu",
+            "🎬 Enhance video quality",
+            "🎧 Enhance audio quality",
+            "🖼️ Enhance image quality",
+            "↩ Back to main menu",
         ]
 
         while True:
@@ -265,9 +268,9 @@ class MenuHandler:
         from src.downloader.audio import descargar_audio
 
         opciones = [
-            "Search & download video",
-            "Search & download audio",
-            "Back to main menu",
+            "🎬 Search & download video",
+            "🎵 Search & download audio",
+            "↩ Back to main menu",
         ]
 
         while True:
@@ -301,7 +304,7 @@ class MenuHandler:
         """Ask whether the searched URL is video or audio (navigable)."""
         idx = select_index(
             "Download as?",
-            ["Video", "Audio"],
+            ["🎬 Video", "🎵 Audio"],
             hint="↑/↓ navigate • Enter select • q = video",
         )
         return "audio" if idx == 1 else "video"
@@ -311,11 +314,11 @@ class MenuHandler:
         from src.utils.helpers import mostrar_ayuda
 
         opciones = [
-            "How to download content",
-            "How to convert files",
-            "How to enhance quality",
-            "How to search YouTube",
-            "Back to main menu",
+            "📥 How to download content",
+            "🔄 How to convert files",
+            "✨ How to enhance quality",
+            "🔎 How to search YouTube",
+            "↩ Back to main menu",
         ]
 
         while True:
